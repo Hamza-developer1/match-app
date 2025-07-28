@@ -24,7 +24,6 @@ const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: true,
-    unique: true,
     lowercase: true,
   },
   name: {
@@ -36,8 +35,6 @@ const userSchema = new Schema<IUser>({
   },
   googleId: {
     type: String,
-    sparse: true,
-    unique: true,
   },
   password: {
     type: String,
@@ -73,6 +70,10 @@ const userSchema = new Schema<IUser>({
   timestamps: true,
 });
 
+// Add indexes for performance
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ isActive: 1, isStudent: 1 }); // For discovery queries
+userSchema.index({ googleId: 1 }, { sparse: true, unique: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
 

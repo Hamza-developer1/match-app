@@ -10,7 +10,7 @@ const registerSchema = z.object({
   name: z.string().min(2),
 });
 
-export async function POST(req: NextRequest) {
+async function handleRegister(req: NextRequest) {
   try {
     const body = await req.json();
     const { email, password, name } = registerSchema.parse(body);
@@ -53,3 +53,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = handleRegister;

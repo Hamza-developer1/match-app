@@ -27,7 +27,7 @@ export default function SignIn() {
       if (result?.error) {
         setError('Invalid credentials');
       } else {
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (err) {
       setError('Something went wrong');
@@ -37,7 +37,7 @@ export default function SignIn() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/dashboard' });
+    signIn('google', { callbackUrl: '/' });
   };
 
   return (
@@ -113,13 +113,23 @@ export default function SignIn() {
             </div>
           </div>
 
-          <div className="text-center">
-            <span className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Sign up
+          <div className="text-center space-y-2">
+            <div>
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Forgot your password?
               </Link>
-            </span>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Sign up
+                </Link>
+              </span>
+            </div>
           </div>
         </form>
       </div>

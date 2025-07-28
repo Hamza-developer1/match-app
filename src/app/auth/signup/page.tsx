@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -13,7 +15,6 @@ export default function SignUp() {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,52 +27,48 @@ export default function SignUp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      toast.error('Passwords do not match');
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      await axios.post('/api/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
 
-      if (response.ok) {
-        const result = await signIn('credentials', {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
-        });
+      toast.success('Account created successfully!');
+      
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
 
-        if (result?.ok) {
-          router.push('/dashboard');
-        } else {
-          router.push('/auth/signin');
-        }
+      if (result?.ok) {
+        toast.success('Welcome! Redirecting to homepage...');
+        router.push('/');
       } else {
-        const data = await response.json();
-        setError(data.error || 'Something went wrong');
+        toast.error('Login failed. Please try signing in manually.');
+        router.push('/auth/signin');
       }
-    } catch (err) {
-      setError('Something went wrong');
+    } catch (err: any) {
+      if (err.response?.data?.error) {
+        toast.error(err.response.data.error);
+      } else {
+        toast.error('Something went wrong');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/dashboard' });
+    signIn('google', { callbackUrl: '/' });
   };
 
   return (
@@ -130,9 +127,6 @@ export default function SignUp() {
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
 
           <div>
             <button
@@ -181,6 +175,7 @@ export default function SignUp() {
           </div>
         </form>
       </div>
+      <Toaster position="top-center" />
     </div>
   );
 }

@@ -30,6 +30,13 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    university: '',
+    major: '',
+    year: '',
+    interest: ''
+  });
   const { socket, isConnected, matchNotifications } = useSocket();
 
   useEffect(() => {
@@ -51,7 +58,14 @@ export default function DiscoverPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/discover');
+      const queryParams = new URLSearchParams();
+      if (filters.university) queryParams.append('university', filters.university);
+      if (filters.major) queryParams.append('major', filters.major);
+      if (filters.year) queryParams.append('year', filters.year);
+      if (filters.interest) queryParams.append('interest', filters.interest);
+      
+      const url = `/api/discover${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await fetch(url);
       const data = await response.json();
       
       if (response.ok) {
@@ -63,6 +77,24 @@ export default function DiscoverPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilters = () => {
+    setLoading(true);
+    fetchUsers();
+    setShowFilters(false);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      university: '',
+      major: '',
+      year: '',
+      interest: ''
+    });
+    setLoading(true);
+    fetchUsers();
+    setShowFilters(false);
   };
 
   const handleAction = async (action: 'like' | 'reject' | 'skip') => {
@@ -129,6 +161,15 @@ export default function DiscoverPage() {
         </Link>
         
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+            </svg>
+            Filters
+          </button>
           <Link href="/profile" className="text-gray-600 hover:text-gray-800">
             Profile
           </Link>
@@ -138,18 +179,90 @@ export default function DiscoverPage() {
       {/* Real-time Match Notifications */}
       <MatchNotification onMatchesUpdate={() => {}} />
 
+      {/* Filter Panel */}
+      {showFilters && (
+        <div className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="max-w-2xl mx-auto px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">University</label>
+                <input
+                  type="text"
+                  value={filters.university}
+                  onChange={(e) => setFilters({...filters, university: e.target.value})}
+                  placeholder="e.g., Stanford, MIT"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Major</label>
+                <input
+                  type="text"
+                  value={filters.major}
+                  onChange={(e) => setFilters({...filters, major: e.target.value})}
+                  placeholder="e.g., Computer Science, Biology"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                <select
+                  value={filters.year}
+                  onChange={(e) => setFilters({...filters, year: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                >
+                  <option value="">Any year</option>
+                  <option value="1">Freshman</option>
+                  <option value="2">Sophomore</option>
+                  <option value="3">Junior</option>
+                  <option value="4">Senior</option>
+                  <option value="5">Graduate</option>
+                  <option value="6">PhD</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Interest</label>
+                <input
+                  type="text"
+                  value={filters.interest}
+                  onChange={(e) => setFilters({...filters, interest: e.target.value})}
+                  placeholder="e.g., Math, Music, Sports"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={applyFilters}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              >
+                Apply Filters
+              </button>
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-md mx-auto px-6 py-12">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Find Study Buddies</h1>
           <p className="text-gray-600">Discover students who share your interests</p>
           
-          {/* Connection Status */}
-          <div className="flex items-center justify-center mt-4">
-            <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span className="text-xs text-gray-500">
-              {isConnected ? 'Connected' : 'Connecting...'}
-            </span>
-          </div>
+          {/* Connection Status - Only show if there are connection issues */}
+          {!isConnected && (
+            <div className="flex items-center justify-center mt-4">
+              <div className="w-2 h-2 rounded-full mr-2 bg-yellow-500"></div>
+              <span className="text-xs text-gray-500">
+                Real-time features connecting...
+              </span>
+            </div>
+          )}
         </div>
 
         {currentUser ? (

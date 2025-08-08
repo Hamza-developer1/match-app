@@ -1,7 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { NextApiRequest } from 'next';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../app/api/auth/[...nextauth]/route';
+import { authOptions } from './auth';
 import User from '../models/User';
 import connectDB from './mongodb';
 
@@ -79,6 +79,67 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       // Handle user going online/offline
       socket.on('user:online', () => {
         socket.broadcast.emit('user:status', { userId, status: 'online' });
+      });
+
+      // Handle sending messages
+      socket.on('message:send', async (data) => {
+        try {
+          const { matchId, receiverId, content, messageType = 'text' } = data;
+          
+          if (!matchId || !receiverId || !content) {
+            socket.emit('message:error', { error: 'Missing required fields' });
+            return;
+          }
+
+          // Emit the message to the receiver
+          socket.to(`user:${receiverId}`).emit('message:receive', {
+            matchId,
+            senderId: userId,
+            content,
+            messageType,
+            timestamp: new Date().toISOString()
+          });
+
+          // Confirm message sent to sender
+          socket.emit('message:sent', {
+            matchId,
+            receiverId,
+            timestamp: new Date().toISOString()
+          });
+
+        } catch (error) {
+          console.error('Error handling message send:', error);
+          socket.emit('message:error', { error: 'Failed to send message' });
+        }
+      });
+
+      // Handle typing indicators
+      socket.on('typing:start', (data) => {
+        const { matchId, receiverId } = data;
+        socket.to(`user:${receiverId}`).emit('typing:user_typing', {
+          matchId,
+          userId,
+          isTyping: true
+        });
+      });
+
+      socket.on('typing:stop', (data) => {
+        const { matchId, receiverId } = data;
+        socket.to(`user:${receiverId}`).emit('typing:user_typing', {
+          matchId,
+          userId,
+          isTyping: false
+        });
+      });
+
+      // Handle message read receipts
+      socket.on('message:mark_read', (data) => {
+        const { matchId, senderId } = data;
+        socket.to(`user:${senderId}`).emit('message:read_receipt', {
+          matchId,
+          readByUserId: userId,
+          timestamp: new Date().toISOString()
+        });
       });
     });
 

@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { initializeWebSocket } from '../../lib/websocket';
 
 interface ExtendedNextApiRequest extends NextApiRequest {
-  socket: {
+  socket: NextApiRequest['socket'] & {
     server: {
       io?: any;
     };
@@ -10,11 +10,7 @@ interface ExtendedNextApiRequest extends NextApiRequest {
 }
 
 export default function handler(req: ExtendedNextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    return initializeWebSocket(req, res);
-  }
-  
-  res.status(405).json({ error: 'Method not allowed' });
+  return initializeWebSocket(req, res);
 }
 
 export const config = {

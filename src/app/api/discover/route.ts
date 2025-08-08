@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import connectToDatabase from "@/lib/mongodb";
+import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import Match from "@/models/Match";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -13,12 +13,26 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await connectToDatabase();
+    // Parse query parameters for filtering
+    const { searchParams } = new URL(request.url);
+    const universityFilter = searchParams.get('university');
+    const majorFilter = searchParams.get('major');
+    const yearFilter = searchParams.get('year');
+    const interestFilter = searchParams.get('interest');
     
-    // Get current user
+    const filters = {
+      university: universityFilter,
+      major: majorFilter,
+      year: yearFilter,
+      interest: interestFilter
+    };
+
+    await connectDB();
+    
+    // Get current user with profile data
     const currentUser = await User.findOne(
       { email: session.user.email },
-      { _id: 1 } // Only fetch _id for performance
+      { _id: 1, profile: 1, email: 1 }
     ).lean();
     
     if (!currentUser) {
@@ -26,16 +40,34 @@ export async function GET() {
     }
 
     const currentUserId = currentUser._id.toString();
+    const currentUserInterests = currentUser.profile?.interests || [];
 
-    // Use aggregation pipeline for better performance
+
+    // Build match criteria with filters
+    const matchCriteria: any = {
+      _id: { $ne: currentUser._id },
+      isActive: true,
+      isStudent: true
+    };
+
+    if (universityFilter) {
+      matchCriteria['profile.university'] = { $regex: universityFilter, $options: 'i' };
+    }
+    if (majorFilter) {
+      matchCriteria['profile.major'] = { $regex: majorFilter, $options: 'i' };
+    }
+    if (yearFilter) {
+      matchCriteria['profile.year'] = parseInt(yearFilter);
+    }
+    if (interestFilter) {
+      matchCriteria['profile.interests'] = { $in: [new RegExp(interestFilter, 'i')] };
+    }
+
+    // Use aggregation pipeline for better performance with interest-based sorting
     const potentialMatches = await User.aggregate([
-      // Stage 1: Match active students (excluding self)
+      // Stage 1: Match active students with filters (excluding self)
       {
-        $match: {
-          _id: { $ne: currentUser._id },
-          isActive: true,
-          isStudent: true
-        }
+        $match: matchCriteria
       },
       // Stage 2: Lookup to exclude users with like/reject actions
       {
@@ -64,17 +96,62 @@ export async function GET() {
           interactions: { $size: 0 }
         }
       },
-      // Stage 4: Remove the interactions field and limit results
+      // Stage 4: Calculate common interests score
+      {
+        $addFields: {
+          commonInterests: {
+            $size: {
+              $ifNull: [
+                {
+                  $setIntersection: [
+                    { $ifNull: ['$profile.interests', []] },
+                    currentUserInterests
+                  ]
+                },
+                []
+              ]
+            }
+          },
+          totalInterests: {
+            $size: { $ifNull: ['$profile.interests', []] }
+          }
+        }
+      },
+      // Stage 5: Calculate compatibility score (prioritize common interests)
+      {
+        $addFields: {
+          compatibilityScore: {
+            $add: [
+              { $multiply: ['$commonInterests', 10] }, // Heavy weight for common interests
+              { $cond: [{ $eq: ['$profile.university', currentUser.profile?.university] }, 3, 0] }, // Same university bonus
+              { $cond: [{ $eq: ['$profile.major', currentUser.profile?.major] }, 2, 0] }, // Same major bonus
+              { $cond: [{ $gt: ['$totalInterests', 0] }, 1, 0] } // Has interests bonus
+            ]
+          }
+        }
+      },
+      // Stage 6: Sort by compatibility score (highest first), then by recent activity
+      {
+        $sort: {
+          compatibilityScore: -1,
+          lastActive: -1
+        }
+      },
+      // Stage 7: Remove temporary fields and limit results
       {
         $project: {
           password: 0,
-          interactions: 0
+          interactions: 0,
+          commonInterests: 0,
+          totalInterests: 0,
+          compatibilityScore: 0
         }
       },
       {
         $limit: 10
       }
     ]);
+
 
     return NextResponse.json({ users: potentialMatches });
   } catch (error) {
@@ -86,69 +163,3 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { targetUserId, action } = body;
-
-    if (!targetUserId || !action || !['like', 'reject', 'skip'].includes(action)) {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    await connectToDatabase();
-    
-    // Get current user (only fetch _id for performance)
-    const currentUser = await User.findOne(
-      { email: session.user.email },
-      { _id: 1 }
-    ).lean();
-    
-    if (!currentUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const currentUserId = currentUser._id.toString();
-
-    // Only create match record for like and reject actions
-    // Skip actions are temporary and don't get stored
-    let isMatch = false;
-    
-    if (action !== 'skip') {
-      // Create/update match record
-      await Match.findOneAndUpdate(
-        { userId: currentUserId, targetUserId },
-        { userId: currentUserId, targetUserId, action },
-        { upsert: true, new: true }
-      );
-
-      // Check for mutual like only if current action is like
-      if (action === 'like') {
-        const reciprocalLike = await Match.findOne({
-          userId: targetUserId,
-          targetUserId: currentUserId,
-          action: 'like'
-        }).lean();
-        
-        isMatch = !!reciprocalLike;
-      }
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      isMatch,
-      message: isMatch ? "It's a match! 🎉" : "Action recorded"
-    });
-  } catch (error) {
-    console.error("Match action error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}

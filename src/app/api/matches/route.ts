@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import connectDB from '../../../lib/mongodb';
-import Match from '../../../models/Match';
-import MutualMatch from '../../../models/MutualMatch';
-import User from '../../../models/User';
+import connectDB from '@/lib/mongodb';
+import Match from '@/models/Match';
+import MutualMatch from '@/models/MutualMatch';
+import User from '@/models/User';
 
 // Handle user actions (like, reject, skip)
 export async function POST(request: NextRequest) {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
       if (reciprocalMatch) {
         // Create mutual match
-        mutualMatch = MutualMatch.createMatch(
+        mutualMatch = (MutualMatch as any).createMatch(
           currentUser._id.toString(),
           targetUserId
         );
@@ -68,9 +68,6 @@ export async function POST(request: NextRequest) {
         // Get target user info for notification
         const targetUser = await User.findById(targetUserId);
         
-        // Here you would emit WebSocket events for real-time notifications
-        // We'll implement this in the next step
-        console.log(`Mutual match created between ${currentUser.name} and ${targetUser?.name}`);
         
         return NextResponse.json({ 
           success: true, 
@@ -86,6 +83,7 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
 
     return NextResponse.json({ 
       success: true, 

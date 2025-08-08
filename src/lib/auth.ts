@@ -2,7 +2,7 @@ import { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import connectToDatabase from '@/lib/mongodb';
+import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 
 export const authOptions: AuthOptions = {
@@ -23,7 +23,7 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          await connectToDatabase();
+          await connectDB();
           const user = await User.findOne({ email: credentials.email }).select('+password');
 
           if (!user || !user.password) {
@@ -52,14 +52,11 @@ export const authOptions: AuthOptions = {
   pages: {
     signIn: '/auth/signin',
   },
-  session: {
-    strategy: 'jwt' as const,
-  },
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
         try {
-          await connectToDatabase();
+          await connectDB();
           const existingUser = await User.findOne({ email: user.email });
 
           if (!existingUser) {
@@ -78,15 +75,10 @@ export const authOptions: AuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as any).id = token.id as string;
+    async session({ session, user }) {
+      // With adapter pattern, user comes from database
+      if (user && session.user) {
+        (session.user as any).id = user.id;
       }
       return session;
     },

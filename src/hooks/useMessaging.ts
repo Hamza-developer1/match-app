@@ -67,7 +67,7 @@ export function useMessaging() {
           const { token } = await response.json();
           console.log('useMessaging: Token received, connecting...');
           
-          const newSocket = io("http://localhost:3000", {
+          const newSocket = io(window.location.origin, {
             path: '/api/socket',
             auth: {
               token: token,

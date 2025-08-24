@@ -33,7 +33,7 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       path: '/api/socket',
       addTrailingSlash: false,
       cors: {
-        origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+        origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
         methods: ['GET', 'POST'],
         credentials: true,
       },

@@ -40,7 +40,7 @@ export function useSocket() {
           console.log('Token starts with:', token ? token.substring(0, 20) + '...' : 'undefined');
           
           // Initialize socket connection with proper JWT token
-          socketRef.current = io("http://localhost:3000", {
+          socketRef.current = io(window.location.origin, {
               path: "/api/socket",
               auth: {
                 token: token,

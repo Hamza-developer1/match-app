@@ -47,9 +47,11 @@ export function useMessaging() {
   const [messages, setMessages] = useState<{ [matchId: string]: Message[] }>({});
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
 
-  // Initialize socket connection
+  // Initialize socket connection (only on localhost for now)
   useEffect(() => {
-    if (session?.user?.email && !socket) {
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    
+    if (session?.user?.email && !socket && isLocalhost) {
       const initializeSocket = async () => {
         try {
           console.log('useMessaging: Fetching WebSocket token...');
@@ -176,7 +178,10 @@ export function useMessaging() {
       initializeSocket();
 
       return () => {
-        socket?.disconnect();
+        if (socket) {
+          socket.disconnect();
+          setSocket(null);
+        }
       };
     }
   }, [session?.user?.email]);
@@ -193,6 +198,21 @@ export function useMessaging() {
       console.error('Error fetching conversations:', error);
     }
   }, []);
+
+  // Polling for new messages on production (fallback when WebSocket isn't available)
+  useEffect(() => {
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    
+    if (!isLocalhost && session?.user?.email) {
+      const pollForUpdates = () => {
+        // Refresh conversations every 10 seconds on production
+        fetchConversations();
+      };
+      
+      const interval = setInterval(pollForUpdates, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [session?.user?.email, fetchConversations]);
 
   // Fetch messages for a specific match
   const fetchMessages = useCallback(async (matchId: string, page: number = 1) => {
@@ -213,13 +233,8 @@ export function useMessaging() {
 
   // Send a message
   const sendMessage = useCallback(async (matchId: string, receiverId: string, content: string, messageType: 'text' | 'image' | 'emoji' = 'text') => {
-    if (!socket || !isConnected) {
-      console.error('Socket not connected');
-      return false;
-    }
-
     try {
-      // Send via API first
+      // Send via API
       const response = await fetch('/api/messages/send', {
         method: 'POST',
         headers: {
@@ -235,13 +250,15 @@ export function useMessaging() {
       if (response.ok) {
         const data = await response.json();
         
-        // Then emit via socket for real-time delivery
-        socket.emit('message:send', {
-          matchId,
-          receiverId,
-          content,
-          messageType,
-        });
+        // If socket is available (localhost), emit for real-time delivery
+        if (socket && isConnected) {
+          socket.emit('message:send', {
+            matchId,
+            receiverId,
+            content,
+            messageType,
+          });
+        }
 
         // Add to local state
         setMessages(prev => ({

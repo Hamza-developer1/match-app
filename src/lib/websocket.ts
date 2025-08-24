@@ -108,6 +108,7 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
         
         if (!userId || !userEmail) {
           console.error('Socket connection without proper authentication data');
+          socket.emit('error', 'Authentication data missing');
           socket.disconnect();
           return;
         }
@@ -134,9 +135,11 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       // Handle sending messages
       socket.on('message:send', async (data) => {
         try {
+          console.log('Message send event received:', data);
           const { matchId, receiverId, content, messageType = 'text' } = data;
           
           if (!matchId || !receiverId || !content) {
+            console.error('Missing required fields in message:', data);
             socket.emit('message:error', { error: 'Missing required fields' });
             return;
           }
@@ -144,12 +147,14 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
           // Verify that both users have a mutual match
           const mutualMatch = await (MutualMatch as any).findMatch(userId, receiverId);
           if (!mutualMatch) {
+            console.error('No mutual match found between users:', userId, receiverId);
             socket.emit('message:error', { error: 'Cannot send message - no mutual match exists' });
             return;
           }
 
           // Verify that the provided matchId corresponds to the actual mutual match
           if (mutualMatch._id.toString() !== matchId) {
+            console.error('Match ID mismatch:', matchId, 'vs', mutualMatch._id.toString());
             socket.emit('message:error', { error: 'Invalid match ID' });
             return;
           }
@@ -169,6 +174,8 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
             receiverId,
             timestamp: new Date().toISOString()
           });
+
+          console.log('Message sent successfully from', userId, 'to', receiverId);
 
         } catch (error) {
           console.error('Error handling message send:', error);
@@ -261,9 +268,9 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
     });
 
     req.socket.server.io = io;
-  }
+    }
   
-  res.end();
+    res.end();
   } catch (error) {
     console.error('WebSocket initialization error:', error);
     res.status(500).end();

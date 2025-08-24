@@ -19,7 +19,9 @@ export function useSocket() {
 
   useEffect(() => {
     console.log('useSocket useEffect triggered, session:', session?.user?.email, 'socketRef:', !!socketRef.current);
-    if (session?.user?.email && !socketRef.current) {
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    
+    if (session?.user?.email && !socketRef.current && isLocalhost) {
       // Fetch WebSocket token and initialize connection
       const initializeSocket = async () => {
         try {

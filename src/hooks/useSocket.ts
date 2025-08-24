@@ -47,6 +47,7 @@ export function useSocket() {
               },
               timeout: 20000,
               forceNew: true,
+              transports: window.location.hostname === 'localhost' ? ['polling', 'websocket'] : ['polling'],
             }
           );
           

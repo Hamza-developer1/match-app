@@ -72,6 +72,7 @@ export function useMessaging() {
             auth: {
               token: token,
             },
+            transports: window.location.hostname === 'localhost' ? ['polling', 'websocket'] : ['polling'],
           });
 
           newSocket.on('connect', () => {
@@ -175,9 +176,7 @@ export function useMessaging() {
       initializeSocket();
 
       return () => {
-        if (socket) {
-          socket.close();
-        }
+        socket?.disconnect();
       };
     }
   }, [session?.user?.email]);

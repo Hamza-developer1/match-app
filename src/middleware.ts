@@ -5,8 +5,8 @@ import { apiRateLimit, authRateLimit } from './lib/rate-limit'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Apply rate limiting to API routes
-  if (pathname.startsWith('/api/')) {
+  // Apply rate limiting to API routes, except WebSocket endpoint
+  if (pathname.startsWith('/api/') && pathname !== '/api/socket') {
     // Stricter rate limiting for auth routes, except frequent-use endpoints
     const frequentAuthEndpoints = ['/api/auth/session', '/api/auth/websocket-token', '/api/auth/providers'];
     if (pathname.startsWith('/api/auth/') && !frequentAuthEndpoints.includes(pathname)) {

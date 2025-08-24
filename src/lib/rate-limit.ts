@@ -14,7 +14,7 @@ export function createRateLimit(options: RateLimitOptions) {
   const { windowMs, max, message = 'Too many requests', skipSuccessfulRequests = false } = options
 
   return async (request: NextRequest): Promise<NextResponse | null> => {
-    const ip = request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown'
+    const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown'
     const now = Date.now()
     const key = `${ip}-${request.nextUrl.pathname}`
     

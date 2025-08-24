@@ -5,10 +5,10 @@ import { authOptions } from './auth';
 import { verifyWebSocketToken } from './websocket-auth';
 import User from '../models/User';
 import MutualMatch from '../models/MutualMatch';
-import connectDB from './mongodb';
+import connectToDatabase from '@/lib/mongodb';
 
 interface ExtendedNextApiRequest extends NextApiRequest {
-  socket: {
+  socket: NextApiRequest['socket'] & {
     server: {
       io?: SocketIOServer;
     };
@@ -23,8 +23,11 @@ export interface AuthenticatedSocket {
 const connectedUsers = new Map<string, string>(); // userId -> socketId
 
 export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any) {
-  if (!req.socket.server.io) {
-    console.log('Initializing Socket.IO server...');
+  try {
+    console.log('WebSocket handler called, method:', req.method, 'path:', req.url);
+    
+    if (!req.socket.server.io) {
+      console.log('Initializing Socket.IO server...');
     
     const io = new SocketIOServer(req.socket.server as any, {
       path: '/api/socket',
@@ -42,18 +45,24 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
     // Authentication middleware
     io.use(async (socket, next) => {
       try {
+        console.log('=== SOCKET AUTH START ===');
         const token = socket.handshake.auth.token;
+        console.log('Socket authentication attempt for IP:', socket.handshake.address);
+        console.log('Received token:', token ? 'Token present (length: ' + token.length + ')' : 'No token');
+        
         if (!token) {
           console.log('Socket authentication failed: No token provided');
           return next(new Error('Authentication token required'));
         }
 
+        console.log('Attempting to verify token...');
         // Verify JWT token
         const decoded = verifyWebSocketToken(token);
+        console.log('Token decoded for user:', decoded.email, 'userId:', decoded.userId);
         
         // Ensure database connection is established
         console.log('Socket auth: Connecting to database...');
-        await connectDB();
+        await connectToDatabase();
         console.log('Socket auth: Database connected, finding user...');
         
         // Verify user exists and token is valid
@@ -62,30 +71,46 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
           .lean()
           .exec();
         
-        if (!user || user.email !== decoded.email) {
-          console.log(`Socket authentication failed: User not found or email mismatch`);
+        if (!user) {
+          console.log(`Socket authentication failed: User not found for ID: ${decoded.userId}`);
+          return next(new Error('User not found'));
+        }
+        
+        if (user.email !== decoded.email) {
+          console.log(`Socket authentication failed: Email mismatch. DB: ${user.email}, Token: ${decoded.email}`);
           return next(new Error('Invalid user credentials'));
         }
 
         (socket as any).userId = decoded.userId;
         (socket as any).userEmail = decoded.email;
-        console.log(`Socket authenticated for user: ${decoded.email}`);
+        console.log(`Socket authenticated successfully for user: ${decoded.email}`);
+        console.log('=== SOCKET AUTH SUCCESS ===');
         next();
       } catch (error) {
+        console.error('=== SOCKET AUTH ERROR ===');
         console.error('Socket authentication error:', error);
+        if (error instanceof Error) {
+          console.error('Error name:', error.name);
+          console.error('Error message:', error.message);
+          console.error('Error stack:', error.stack);
+        }
+        console.error('=== END SOCKET AUTH ERROR ===');
         return next(new Error(`Authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
       }
     });
 
     io.on('connection', (socket) => {
-      const userId = (socket as any).userId;
-      const userEmail = (socket as any).userEmail;
-      
-      if (!userId || !userEmail) {
-        console.error('Socket connection without proper authentication data');
-        socket.disconnect();
-        return;
-      }
+      try {
+        console.log('=== NEW SOCKET CONNECTION ===');
+        const userId = (socket as any).userId;
+        const userEmail = (socket as any).userEmail;
+        console.log('Connection attempt for userId:', userId, 'email:', userEmail);
+        
+        if (!userId || !userEmail) {
+          console.error('Socket connection without proper authentication data');
+          socket.disconnect();
+          return;
+        }
       
       console.log(`User ${userEmail} connected with socket ${socket.id}`);
       
@@ -227,12 +252,22 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
           // Silently ignore errors in read receipts
         }
       });
+      } catch (error) {
+        console.error('=== CONNECTION HANDLER ERROR ===');
+        console.error('Error in connection handler:', error);
+        console.error('=== END CONNECTION HANDLER ERROR ===');
+        socket.disconnect();
+      }
     });
 
     req.socket.server.io = io;
   }
   
   res.end();
+  } catch (error) {
+    console.error('WebSocket initialization error:', error);
+    res.status(500).end();
+  }
 }
 
 // Function to emit match notifications

@@ -13,7 +13,6 @@ export async function getRedisClient() {
       database: parseInt(process.env.REDIS_DB || '0'),
       socket: {
         connectTimeout: 5000,
-        lazyConnect: true,
       },
     });
 

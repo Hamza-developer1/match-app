@@ -141,45 +141,56 @@ export default function MatchingCard({ user, onAction, isLoading }: MatchingCard
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-center space-x-4">
-          {/* Reject */}
-          <button
-            onClick={() => handleAction('reject')}
-            disabled={isLoading || actionLoading !== null}
-            className="w-14 h-14 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-lg"
-          >
-            {actionLoading === 'reject' ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <span className="text-xl">✕</span>
-            )}
-          </button>
-
-          {/* Skip */}
-          <button
-            onClick={() => handleAction('skip')}
-            disabled={isLoading || actionLoading !== null}
-            className="w-14 h-14 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 text-white rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-lg"
-          >
-            {actionLoading === 'skip' ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <span className="text-xl">⏭</span>
-            )}
-          </button>
-
-          {/* Like */}
+        <div className="flex flex-col space-y-3">
+          {/* Connect */}
           <button
             onClick={() => handleAction('like')}
             disabled={isLoading || actionLoading !== null}
-            className="w-14 h-14 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-lg"
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg font-medium flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg"
           >
             {actionLoading === 'like' ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <span className="text-xl">💙</span>
+              <>
+                <span className="mr-2">🤝</span>
+                <span>Connect</span>
+              </>
             )}
           </button>
+
+          <div className="flex space-x-3">
+            {/* Maybe Later */}
+            <button
+              onClick={() => handleAction('skip')}
+              disabled={isLoading || actionLoading !== null}
+              className="flex-1 py-2 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-700 rounded-lg font-medium flex items-center justify-center transition-all duration-200"
+            >
+              {actionLoading === 'skip' ? (
+                <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span className="mr-1">⏰</span>
+                  <span className="text-sm">Maybe Later</span>
+                </>
+              )}
+            </button>
+
+            {/* Pass */}
+            <button
+              onClick={() => handleAction('reject')}
+              disabled={isLoading || actionLoading !== null}
+              className="flex-1 py-2 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-700 rounded-lg font-medium flex items-center justify-center transition-all duration-200"
+            >
+              {actionLoading === 'reject' ? (
+                <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span className="mr-1">👋</span>
+                  <span className="text-sm">Pass</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

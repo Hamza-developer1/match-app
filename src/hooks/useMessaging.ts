@@ -50,21 +50,45 @@ export function useMessaging() {
   // Initialize socket connection
   useEffect(() => {
     if (session?.user?.email && !socket) {
-      const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || '', {
-        path: '/api/socket',
-        auth: {
-          token: session.user.email, // In production, use proper JWT token
-        },
-      });
+      const initializeSocket = async () => {
+        try {
+          console.log('useMessaging: Fetching WebSocket token...');
+          const response = await fetch('/api/auth/websocket-token', {
+            method: 'GET',
+            credentials: 'include',
+          });
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('useMessaging: Token fetch failed:', response.status, errorText);
+            return;
+          }
+          
+          const { token } = await response.json();
+          console.log('useMessaging: Token received, connecting...');
+          
+          const newSocket = io("http://localhost:3000", {
+            path: '/api/socket',
+            auth: {
+              token: token,
+            },
+          });
 
-      newSocket.on('connect', () => {
-        setIsConnected(true);
-        newSocket.emit('user:online');
-      });
+          newSocket.on('connect', () => {
+            console.log('useMessaging: Socket connected');
+            setIsConnected(true);
+            newSocket.emit('user:online');
+          });
 
-      newSocket.on('disconnect', () => {
-        setIsConnected(false);
-      });
+          newSocket.on('disconnect', () => {
+            console.log('useMessaging: Socket disconnected');
+            setIsConnected(false);
+          });
+
+          newSocket.on('connect_error', (error) => {
+            console.error('useMessaging: Socket connection error:', error);
+            setIsConnected(false);
+          });
 
       // Handle incoming messages
       newSocket.on('message:receive', (data) => {
@@ -142,10 +166,18 @@ export function useMessaging() {
         }));
       });
 
-      setSocket(newSocket);
+          setSocket(newSocket);
+        } catch (error) {
+          console.error('useMessaging: Failed to initialize socket:', error);
+        }
+      };
+      
+      initializeSocket();
 
       return () => {
-        newSocket.close();
+        if (socket) {
+          socket.close();
+        }
       };
     }
   }, [session?.user?.email]);

@@ -18,31 +18,48 @@ export function useSocket() {
   >([]);
 
   useEffect(() => {
+    console.log('useSocket useEffect triggered, session:', session?.user?.email, 'socketRef:', !!socketRef.current);
     if (session?.user?.email && !socketRef.current) {
       // Fetch WebSocket token and initialize connection
       const initializeSocket = async () => {
         try {
-          const response = await fetch('/api/auth/websocket-token');
+          console.log('Fetching WebSocket token...');
+          const response = await fetch('/api/auth/websocket-token', {
+            method: 'GET',
+            credentials: 'include', // Include cookies for session
+          });
           if (!response.ok) {
-            throw new Error('Failed to get WebSocket token');
+            const errorText = await response.text();
+            console.error('Token fetch failed:', response.status, errorText);
+            console.error('Response headers:', Object.fromEntries(response.headers.entries()));
+            throw new Error(`Failed to get WebSocket token: ${response.status} - ${errorText}`);
           }
           
           const { token } = await response.json();
+          console.log('WebSocket token received, length:', token ? token.length : 'undefined');
+          console.log('Token starts with:', token ? token.substring(0, 20) + '...' : 'undefined');
           
           // Initialize socket connection with proper JWT token
-          socketRef.current = io(
-            process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-            {
+          socketRef.current = io("http://localhost:3000", {
               path: "/api/socket",
               auth: {
                 token: token,
               },
+              timeout: 20000,
+              forceNew: true,
             }
           );
           
           setupSocketListeners();
         } catch (error) {
           console.error('Failed to initialize socket:', error);
+          // Retry after a delay if this was the first attempt
+          setTimeout(() => {
+            if (session?.user?.email && !socketRef.current) {
+              console.log('Retrying socket initialization...');
+              initializeSocket();
+            }
+          }, 5000);
         }
       };
       

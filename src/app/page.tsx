@@ -410,7 +410,7 @@ export default function Home() {
         <div className="bg-white/60 backdrop-blur-sm py-20">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Why Choose MatchApp for Campus Life?
+              Why Choose MatchApp for Student Networking?
             </h2>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -419,11 +419,11 @@ export default function Home() {
                   <span className="text-white text-2xl">🎯</span>
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-gray-800">
-                  Interest-Based Matching
+                  Academic Networking
                 </h3>
                 <p className="text-gray-600">
-                  Find students who share your hobbies, academic interests, and
-                  extracurricular activities.
+                  Connect with students who share your academic interests,
+                  study goals, and career aspirations.
                 </p>
               </div>
 
@@ -436,7 +436,7 @@ export default function Home() {
                 </h3>
                 <p className="text-gray-600">
                   Connect exclusively with students from your university for
-                  authentic campus friendships.
+                  academic collaboration and professional networking.
                 </p>
               </div>
 
@@ -445,11 +445,11 @@ export default function Home() {
                   <span className="text-white text-2xl">🤝</span>
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-gray-800">
-                  Study Groups & Friends
+                  Study Groups & Collaboration
                 </h3>
                 <p className="text-gray-600">
-                  Form study groups, join clubs, and build lasting friendships
-                  with like-minded classmates.
+                  Form study groups, collaborate on projects, and build
+                  professional relationships with classmates.
                 </p>
               </div>
             </div>
@@ -469,7 +469,7 @@ export default function Home() {
             </span>
           </div>
           <p className="text-gray-600 mb-6">
-            Building campus friendships through shared interests.
+            Building academic connections through shared learning goals.
           </p>
           <div className="flex justify-center space-x-8 text-sm text-gray-500">
             <Link

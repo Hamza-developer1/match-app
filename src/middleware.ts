@@ -7,12 +7,12 @@ export async function middleware(request: NextRequest) {
   
   // Apply rate limiting to API routes
   if (pathname.startsWith('/api/')) {
-    // Stricter rate limiting for auth routes
-    if (pathname.startsWith('/api/auth/')) {
+    // Stricter rate limiting for auth routes, except WebSocket token
+    if (pathname.startsWith('/api/auth/') && pathname !== '/api/auth/websocket-token') {
       const rateLimitResponse = await authRateLimit(request)
       if (rateLimitResponse) return rateLimitResponse
     } else {
-      // General API rate limiting
+      // General API rate limiting (including WebSocket token)
       const rateLimitResponse = await apiRateLimit(request)
       if (rateLimitResponse) return rateLimitResponse
     }
@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/auth/[...nextauth]',
+    '/api/socket',
     '/api/profile',
     '/api/discover',
     '/api/matches',
@@ -49,7 +50,7 @@ export async function middleware(request: NextRequest) {
   
   // Check for API routes with dynamic segments
   const apiRoutePatterns = [
-    /^\/api\/auth\/\[\.\.\.nextauth\]$/,
+    /^\/api\/auth\/.+$/,
     /^\/api\/messages\/[^\/]+$/
   ]
   

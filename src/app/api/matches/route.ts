@@ -5,6 +5,16 @@ import connectDB from '@/lib/mongodb';
 import Match from '@/models/Match';
 import MutualMatch from '@/models/MutualMatch';
 import User from '@/models/User';
+import mongoose from 'mongoose';
+import { z } from 'zod';
+
+const matchActionSchema = z.object({
+  targetUserId: z.string().refine(
+    (id) => mongoose.Types.ObjectId.isValid(id),
+    { message: 'Invalid target user ID' }
+  ),
+  action: z.enum(['like', 'reject', 'skip'])
+});
 
 // Handle user actions (like, reject, skip)
 export async function POST(request: NextRequest) {
@@ -16,11 +26,8 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
     
-    const { targetUserId, action } = await request.json();
-    
-    if (!targetUserId || !action || !['like', 'reject', 'skip'].includes(action)) {
-      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
-    }
+    const body = await request.json();
+    const { targetUserId, action } = matchActionSchema.parse(body);
 
     // Find current user
     const currentUser = await User.findOne({ email: session.user.email });
@@ -30,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already acted on this target
     const existingMatch = await Match.findOne({
-      userId: currentUser._id.toString(),
+      userId: currentUser._id,
       targetUserId: targetUserId
     });
 
@@ -40,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // Create the match record
     const match = new Match({
-      userId: currentUser._id.toString(),
+      userId: currentUser._id,
       targetUserId: targetUserId,
       action: action
     });
@@ -53,14 +60,14 @@ export async function POST(request: NextRequest) {
       // Check if the target user has also liked the current user
       const reciprocalMatch = await Match.findOne({
         userId: targetUserId,
-        targetUserId: currentUser._id.toString(),
+        targetUserId: currentUser._id,
         action: 'like'
       });
 
       if (reciprocalMatch) {
         // Create mutual match
         mutualMatch = (MutualMatch as any).createMatch(
-          currentUser._id.toString(),
+          currentUser._id,
           targetUserId
         );
         await mutualMatch.save();
@@ -91,6 +98,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input data' },
+        { status: 400 }
+      );
+    }
     console.error('Match action error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -111,7 +124,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const userId = currentUser._id.toString();
+    const userId = currentUser._id;
 
     // Find all mutual matches for this user
     const mutualMatches = await MutualMatch.find({

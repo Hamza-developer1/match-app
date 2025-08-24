@@ -55,6 +55,11 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
+        // Check if email is from .edu domain
+        if (!user.email?.endsWith('.edu')) {
+          return false; // Reject non-.edu emails
+        }
+
         try {
           await connectDB();
           const existingUser = await User.findOne({ email: user.email });
@@ -66,6 +71,7 @@ export const authOptions: AuthOptions = {
               image: user.image,
               googleId: account.providerAccountId,
               isStudent: true,
+              isEmailVerified: true, // Auto-verify OAuth users with .edu emails
             });
           }
         } catch (error) {

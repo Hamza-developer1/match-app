@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMessaging, Conversation } from '../hooks/useMessaging';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -11,6 +12,7 @@ interface ConversationListProps {
 
 export default function ConversationList({ onSelectConversation, selectedMatchId }: ConversationListProps) {
   const { conversations, fetchConversations, isConnected } = useMessaging();
+  const router = useRouter();
 
   useEffect(() => {
     fetchConversations();
@@ -30,7 +32,23 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => router.push('/')}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Back to Home"
+            >
+              <svg 
+                className="w-5 h-5 text-gray-600" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+          </div>
           <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-400'}`} 
                title={isConnected ? 'Connected' : 'Disconnected'} />
         </div>

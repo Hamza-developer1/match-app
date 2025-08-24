@@ -6,9 +6,38 @@ const transporter = nodemailer.createTransport({
   secure: process.env.SMTP_SECURE === "true",
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
+    pass: process.env.SMTP_PASS,
   },
 });
+
+interface EmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}
+
+export async function sendEmail(options: EmailOptions) {
+  const mailOptions = {
+    from: `${process.env.EMAIL_FROM_NAME || "MatchApp"} <${
+      process.env.EMAIL_FROM || process.env.SMTP_USER
+    }>`,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    text: options.text,
+  };
+
+  try {
+    console.log("Attempting to send email to:", options.to);
+    const result = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", result.messageId);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    return { success: false, error: "Failed to send email" };
+  }
+}
 
 export async function sendPasswordResetEmail(
   email: string,
@@ -19,7 +48,9 @@ export async function sendPasswordResetEmail(
   }/auth/reset-password?token=${resetToken}`;
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: `${process.env.EMAIL_FROM_NAME || "MatchApp"} <${
+      process.env.EMAIL_FROM || process.env.SMTP_USER
+    }>`,
     to: email,
     subject: "Reset Your MatchApp Password",
     html: `
@@ -79,17 +110,17 @@ If you didn't request this password reset, please ignore this email.
   };
 
   try {
-    console.log('Attempting to send email to:', email);
-    console.log('SMTP Config:', {
+    console.log("Attempting to send email to:", email);
+    console.log("SMTP Config:", {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
       user: process.env.SMTP_USER,
-      from: process.env.SMTP_FROM,
-      secure: process.env.SMTP_SECURE === 'true'
+      from: process.env.EMAIL_FROM,
+      secure: process.env.SMTP_SECURE === "true",
     });
-    
+
     const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
+    console.log("Email sent successfully:", result.messageId);
     return { success: true };
   } catch (error) {
     console.error("Failed to send password reset email:", error);

@@ -35,8 +35,6 @@ const passwordResetSchema = new Schema<IPasswordReset>({
 // Index for automatic cleanup of expired tokens
 passwordResetSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-// Index for fast token lookup
-passwordResetSchema.index({ token: 1 });
 
 const PasswordReset: Model<IPasswordReset> = 
   mongoose.models.PasswordReset || mongoose.model<IPasswordReset>('PasswordReset', passwordResetSchema);

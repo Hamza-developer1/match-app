@@ -19,16 +19,38 @@ export function useSocket() {
 
   useEffect(() => {
     if (session?.user?.email && !socketRef.current) {
-      // Initialize socket connection
-      socketRef.current = io(
-        process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        {
-          path: "/api/socket",
-          auth: {
-            token: session.user.email, // In production, use proper JWT
-          },
+      // Fetch WebSocket token and initialize connection
+      const initializeSocket = async () => {
+        try {
+          const response = await fetch('/api/auth/websocket-token');
+          if (!response.ok) {
+            throw new Error('Failed to get WebSocket token');
+          }
+          
+          const { token } = await response.json();
+          
+          // Initialize socket connection with proper JWT token
+          socketRef.current = io(
+            process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+            {
+              path: "/api/socket",
+              auth: {
+                token: token,
+              },
+            }
+          );
+          
+          setupSocketListeners();
+        } catch (error) {
+          console.error('Failed to initialize socket:', error);
         }
-      );
+      };
+      
+      initializeSocket();
+    }
+
+    function setupSocketListeners() {
+      if (!socketRef.current) return;
 
       const socket = socketRef.current;
 
@@ -69,6 +91,25 @@ export function useSocket() {
 
       socket.on("connect_error", (error) => {
         console.error("Socket connection error:", error);
+        setIsConnected(false);
+        
+        // Don't automatically retry - let Socket.IO handle reconnection
+        // The client will automatically retry with exponential backoff
+      });
+
+      // Handle reconnection events
+      socket.on("reconnect", (attemptNumber) => {
+        console.log(`Socket reconnected after ${attemptNumber} attempts`);
+        setIsConnected(true);
+      });
+
+      socket.on("reconnect_error", (error) => {
+        console.error("Socket reconnection failed:", error);
+      });
+
+      socket.on("reconnect_failed", () => {
+        console.error("Socket reconnection failed permanently");
+        setIsConnected(false);
       });
     }
 

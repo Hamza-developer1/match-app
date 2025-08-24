@@ -26,10 +26,11 @@ async function connectToDatabase() {
     console.log("🔗 MongoDB: Creating new connection...");
     // Create and cache the connection promise
     cachedConnection = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
+      bufferCommands: true, // Enable buffering to prevent the error
       maxPoolSize: 10, // Maximum number of connections
-      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      serverSelectionTimeoutMS: 10000, // Keep trying to send operations for 10 seconds
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
       family: 4 // Use IPv4, skip trying IPv6
     });
 

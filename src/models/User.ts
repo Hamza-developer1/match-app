@@ -7,6 +7,7 @@ export interface IUser extends Document {
   googleId?: string;
   password?: string;
   isStudent: boolean;
+  isEmailVerified: boolean;
   profile?: {
     university?: string;
     year?: number;
@@ -43,6 +44,10 @@ const userSchema = new Schema<IUser>({
   isStudent: {
     type: Boolean,
     default: true,
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
   },
   profile: {
     university: String,

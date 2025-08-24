@@ -2,7 +2,9 @@ import { Server as SocketIOServer } from 'socket.io';
 import { NextApiRequest } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
+import { verifyWebSocketToken } from './websocket-auth';
 import User from '../models/User';
+import MutualMatch from '../models/MutualMatch';
 import connectDB from './mongodb';
 
 interface ExtendedNextApiRequest extends NextApiRequest {
@@ -30,7 +32,11 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       cors: {
         origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
         methods: ['GET', 'POST'],
+        credentials: true,
       },
+      transports: ['polling', 'websocket'],
+      pingTimeout: 60000,
+      pingInterval: 25000,
     });
 
     // Authentication middleware
@@ -38,29 +44,48 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       try {
         const token = socket.handshake.auth.token;
         if (!token) {
+          console.log('Socket authentication failed: No token provided');
           return next(new Error('Authentication token required'));
         }
 
-        // In a real implementation, you'd verify the JWT token here
-        // For now, we'll assume the token contains the user email
-        await connectDB();
-        const user = await User.findOne({ email: token });
+        // Verify JWT token
+        const decoded = verifyWebSocketToken(token);
         
-        if (!user) {
-          return next(new Error('User not found'));
+        // Ensure database connection is established
+        console.log('Socket auth: Connecting to database...');
+        await connectDB();
+        console.log('Socket auth: Database connected, finding user...');
+        
+        // Verify user exists and token is valid
+        const user = await User.findById(decoded.userId)
+          .maxTimeMS(10000)
+          .lean()
+          .exec();
+        
+        if (!user || user.email !== decoded.email) {
+          console.log(`Socket authentication failed: User not found or email mismatch`);
+          return next(new Error('Invalid user credentials'));
         }
 
-        (socket as any).userId = user._id.toString();
-        (socket as any).userEmail = user.email;
+        (socket as any).userId = decoded.userId;
+        (socket as any).userEmail = decoded.email;
+        console.log(`Socket authenticated for user: ${decoded.email}`);
         next();
       } catch (error) {
-        next(new Error('Authentication failed'));
+        console.error('Socket authentication error:', error);
+        return next(new Error(`Authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
       }
     });
 
     io.on('connection', (socket) => {
       const userId = (socket as any).userId;
       const userEmail = (socket as any).userEmail;
+      
+      if (!userId || !userEmail) {
+        console.error('Socket connection without proper authentication data');
+        socket.disconnect();
+        return;
+      }
       
       console.log(`User ${userEmail} connected with socket ${socket.id}`);
       
@@ -91,6 +116,19 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
             return;
           }
 
+          // Verify that both users have a mutual match
+          const mutualMatch = await (MutualMatch as any).findMatch(userId, receiverId);
+          if (!mutualMatch) {
+            socket.emit('message:error', { error: 'Cannot send message - no mutual match exists' });
+            return;
+          }
+
+          // Verify that the provided matchId corresponds to the actual mutual match
+          if (mutualMatch._id.toString() !== matchId) {
+            socket.emit('message:error', { error: 'Invalid match ID' });
+            return;
+          }
+
           // Emit the message to the receiver
           socket.to(`user:${receiverId}`).emit('message:receive', {
             matchId,
@@ -114,32 +152,80 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       });
 
       // Handle typing indicators
-      socket.on('typing:start', (data) => {
-        const { matchId, receiverId } = data;
-        socket.to(`user:${receiverId}`).emit('typing:user_typing', {
-          matchId,
-          userId,
-          isTyping: true
-        });
+      socket.on('typing:start', async (data) => {
+        try {
+          const { matchId, receiverId } = data;
+          
+          if (!matchId || !receiverId) {
+            return; // Silently ignore invalid typing indicators
+          }
+
+          // Verify that both users have a mutual match
+          const mutualMatch = await (MutualMatch as any).findMatch(userId, receiverId);
+          if (!mutualMatch || mutualMatch._id.toString() !== matchId) {
+            return; // Silently ignore unauthorized typing indicators
+          }
+
+          socket.to(`user:${receiverId}`).emit('typing:user_typing', {
+            matchId,
+            userId,
+            isTyping: true
+          });
+        } catch (error) {
+          console.error('Error handling typing start:', error);
+          // Silently ignore errors in typing indicators
+        }
       });
 
-      socket.on('typing:stop', (data) => {
-        const { matchId, receiverId } = data;
-        socket.to(`user:${receiverId}`).emit('typing:user_typing', {
-          matchId,
-          userId,
-          isTyping: false
-        });
+      socket.on('typing:stop', async (data) => {
+        try {
+          const { matchId, receiverId } = data;
+          
+          if (!matchId || !receiverId) {
+            return; // Silently ignore invalid typing indicators
+          }
+
+          // Verify that both users have a mutual match
+          const mutualMatch = await (MutualMatch as any).findMatch(userId, receiverId);
+          if (!mutualMatch || mutualMatch._id.toString() !== matchId) {
+            return; // Silently ignore unauthorized typing indicators
+          }
+
+          socket.to(`user:${receiverId}`).emit('typing:user_typing', {
+            matchId,
+            userId,
+            isTyping: false
+          });
+        } catch (error) {
+          console.error('Error handling typing stop:', error);
+          // Silently ignore errors in typing indicators
+        }
       });
 
       // Handle message read receipts
-      socket.on('message:mark_read', (data) => {
-        const { matchId, senderId } = data;
-        socket.to(`user:${senderId}`).emit('message:read_receipt', {
-          matchId,
-          readByUserId: userId,
-          timestamp: new Date().toISOString()
-        });
+      socket.on('message:mark_read', async (data) => {
+        try {
+          const { matchId, senderId } = data;
+          
+          if (!matchId || !senderId) {
+            return; // Silently ignore invalid read receipts
+          }
+
+          // Verify that both users have a mutual match
+          const mutualMatch = await (MutualMatch as any).findMatch(userId, senderId);
+          if (!mutualMatch || mutualMatch._id.toString() !== matchId) {
+            return; // Silently ignore unauthorized read receipts
+          }
+
+          socket.to(`user:${senderId}`).emit('message:read_receipt', {
+            matchId,
+            readByUserId: userId,
+            timestamp: new Date().toISOString()
+          });
+        } catch (error) {
+          console.error('Error handling message read receipt:', error);
+          // Silently ignore errors in read receipts
+        }
       });
     });
 

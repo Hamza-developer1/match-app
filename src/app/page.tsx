@@ -2,13 +2,28 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MatchNotification from "../components/MatchNotification";
+import { useMessaging } from "../hooks/useMessaging";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const { conversations, fetchConversations } = useMessaging();
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  
+  // Calculate total unread messages
+  useEffect(() => {
+    if (session) {
+      fetchConversations();
+    }
+  }, [session, fetchConversations]);
+  
+  useEffect(() => {
+    const total = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
+    setTotalUnreadCount(total);
+  }, [conversations]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -87,12 +102,17 @@ export default function Home() {
               <div className="flex items-center gap-4">
                 {/* Notifications */}
                 <div className="hidden md:flex items-center">
-                  <button className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
+                  <Link 
+                    href="/messages"
+                    className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                  >
                     <span className="text-xl">🔔</span>
-                    <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">3</span>
-                    </div>
-                  </button>
+                    {totalUnreadCount > 0 && (
+                      <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">{totalUnreadCount > 9 ? '9+' : totalUnreadCount}</span>
+                      </div>
+                    )}
+                  </Link>
                 </div>
 
                 {/* Profile Dropdown */}
@@ -140,7 +160,11 @@ export default function Home() {
                       >
                         <span className="mr-3">💬</span>
                         Messages
-                        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">3</span>
+                        {totalUnreadCount > 0 && (
+                          <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                            {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                          </span>
+                        )}
                       </Link>
                       <div className="border-t border-gray-100 my-2"></div>
                       <button
@@ -221,7 +245,11 @@ export default function Home() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span>💬 Messages</span>
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">3</span>
+                    {totalUnreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                        {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                      </span>
+                    )}
                   </Link>
                   <Link
                     href="/settings"

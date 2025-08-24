@@ -7,12 +7,13 @@ export async function middleware(request: NextRequest) {
   
   // Apply rate limiting to API routes
   if (pathname.startsWith('/api/')) {
-    // Stricter rate limiting for auth routes, except WebSocket token
-    if (pathname.startsWith('/api/auth/') && pathname !== '/api/auth/websocket-token') {
+    // Stricter rate limiting for auth routes, except frequent-use endpoints
+    const frequentAuthEndpoints = ['/api/auth/session', '/api/auth/websocket-token', '/api/auth/providers'];
+    if (pathname.startsWith('/api/auth/') && !frequentAuthEndpoints.includes(pathname)) {
       const rateLimitResponse = await authRateLimit(request)
       if (rateLimitResponse) return rateLimitResponse
     } else {
-      // General API rate limiting (including WebSocket token)
+      // General API rate limiting (including frequent auth endpoints)
       const rateLimitResponse = await apiRateLimit(request)
       if (rateLimitResponse) return rateLimitResponse
     }
@@ -60,8 +61,8 @@ export async function middleware(request: NextRequest) {
   // Check if it matches any API route pattern
   const isValidApiRoute = apiRoutePatterns.some(pattern => pattern.test(pathname))
   
-  // Allow favicon and static assets
-  if (pathname === '/favicon.ico' || pathname.startsWith('/_next/') || pathname.startsWith('/static/')) {
+  // Allow icon and static assets
+  if (pathname === '/icon.svg' || pathname.startsWith('/_next/') || pathname.startsWith('/static/')) {
     return NextResponse.next()
   }
   
@@ -79,8 +80,8 @@ export const config = {
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - icon.svg (icon file)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|icon.svg).*)',
   ],
 }

@@ -1,0 +1,17 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Diploma scroll -->
+  <rect x="4" y="8" width="24" height="16" rx="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1"/>
+  
+  <!-- Scroll ends -->
+  <circle cx="4" cy="16" r="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1"/>
+  <circle cx="28" cy="16" r="2" fill="#f8f9fa" stroke="#6c757d" stroke-width="1"/>
+  
+  <!-- Text lines -->
+  <line x1="8" y1="12" x2="20" y2="12" stroke="#495057" stroke-width="1"/>
+  <line x1="8" y1="16" x2="24" y2="16" stroke="#495057" stroke-width="1.5"/>
+  <line x1="8" y1="20" x2="18" y2="20" stroke="#495057" stroke-width="1"/>
+  
+  <!-- Ribbon -->
+  <path d="M20 24 L24 28 L28 24 L24 20 Z" fill="#dc3545" stroke="#b02a37" stroke-width="0.5"/>
+  <path d="M24 20 L24 6 L22 8 L24 10 L26 8 Z" fill="#dc3545" stroke="#b02a37" stroke-width="0.5"/>
+</svg>

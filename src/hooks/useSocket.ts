@@ -71,7 +71,7 @@ export function useSocket() {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("New Match! 🎉", {
             body: "You have a new mutual match on MatchApp!",
-            icon: "/favicon.ico",
+            icon: "/icon.svg",
           });
         }
       });
@@ -84,7 +84,7 @@ export function useSocket() {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("Someone liked you! 💙", {
             body: "Check out your new like on MatchApp!",
-            icon: "/favicon.ico",
+            icon: "/icon.svg",
           });
         }
       });

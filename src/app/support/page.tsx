@@ -39,7 +39,7 @@ export default function Support() {
               <span className="text-white font-bold text-lg">🎓</span>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </h1>
           </Link>
         </div>
@@ -117,7 +117,7 @@ export default function Support() {
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            We're here to help you make the most of your MatchApp experience. Find answers or get in touch.
+            We're here to help you make the most of your Campus Connect experience. Find answers or get in touch.
           </p>
         </div>
 
@@ -132,7 +132,7 @@ export default function Support() {
                 <span className="text-white text-3xl">🎯</span>
               </div>
               <h3 className="text-xl font-bold mb-4 text-gray-800">Getting Started</h3>
-              <p className="text-gray-600 mb-6">Learn how to create your profile, find matches, and connect with fellow students.</p>
+              <p className="text-gray-600 mb-6">Learn how to create your profile, find connections, and connect with fellow students.</p>
               <button 
                 onClick={() => setSelectedCategory('getting-started')}
                 className="px-6 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
@@ -189,12 +189,12 @@ export default function Support() {
               
               <div className="border-b border-gray-200 pb-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Can I connect with students from other universities?</h3>
-                <p className="text-gray-600">No, MatchApp is campus-focused. You can only see and connect with verified students from your own university.</p>
+                <p className="text-gray-600">No, Campus Connect is campus-focused. You can only see and connect with verified students from your own university.</p>
               </div>
               
               <div className="border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Is MatchApp free to use?</h3>
-                <p className="text-gray-600">Yes! MatchApp is completely free for all verified college students. Our mission is to help you build campus connections.</p>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Is Campus Connect free to use?</h3>
+                <p className="text-gray-600">Yes! Campus Connect is completely free for all verified college students. Our mission is to help you build campus connections.</p>
               </div>
               
               <div className="border-b border-gray-200 pb-4">
@@ -321,7 +321,7 @@ export default function Support() {
             <div className="bg-blue-50 rounded-2xl p-6 text-center">
               <div className="text-3xl mb-3">📸</div>
               <h3 className="font-semibold text-gray-800 mb-2">Complete Your Profile</h3>
-              <p className="text-sm text-gray-600">Add a photo and fill out all sections to increase your match potential.</p>
+              <p className="text-sm text-gray-600">Add a photo and fill out all sections to increase your connection potential.</p>
             </div>
             
             <div className="bg-indigo-50 rounded-2xl p-6 text-center">
@@ -353,7 +353,7 @@ export default function Support() {
               <span className="text-white text-sm">🎓</span>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </span>
           </div>
           <p className="text-gray-600 mb-6">Building campus friendships through shared interests.</p>
@@ -364,7 +364,7 @@ export default function Support() {
             <Link href="/about" className="hover:text-blue-600 transition-colors">About</Link>
           </div>
           <p className="text-xs text-gray-400 mt-6">
-            © 2024 MatchApp. Made with 🎓 for campus connections.
+            © 2024 Campus Connect. Made with 🎓 for campus connections.
           </p>
         </div>
       </footer>

@@ -16,7 +16,7 @@ export default function About() {
               <span className="text-white font-bold text-lg">🎓</span>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </h1>
           </Link>
         </div>
@@ -110,7 +110,7 @@ export default function About() {
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              About MatchApp
+              About Campus Connect
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -131,7 +131,7 @@ export default function About() {
               </h2>
             </div>
             <p className="text-lg text-gray-700 leading-relaxed text-center max-w-3xl mx-auto">
-              MatchApp was created to solve one of the biggest challenges in
+              Campus Connect was created to solve one of the biggest challenges in
               college life: finding your tribe. We believe that meaningful
               connections are the foundation of a successful and fulfilling
               college experience. Our platform helps students discover
@@ -311,7 +311,7 @@ export default function About() {
               <span className="text-white text-sm">🎓</span>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </span>
           </div>
           <p className="text-gray-600 mb-6">
@@ -344,7 +344,7 @@ export default function About() {
             </Link>
           </div>
           <p className="text-xs text-gray-400 mt-6">
-            © 2025 MatchApp. Made with 🎓 for campus connections.
+            © 2025 Campus Connect. Made with 🎓 for campus connections.
           </p>
         </div>
       </footer>

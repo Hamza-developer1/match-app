@@ -29,6 +29,7 @@ export async function middleware(request: NextRequest) {
     '/profile',
     '/discover',
     '/messages',
+    '/connections',
     '/support',
     '/about',
     '/terms',

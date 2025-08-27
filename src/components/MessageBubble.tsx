@@ -7,14 +7,15 @@ interface MessageBubbleProps {
   message: Message;
   isOwnMessage: boolean;
   showTimestamp?: boolean;
+  otherUserName?: string;
 }
 
-export default function MessageBubble({ message, isOwnMessage, showTimestamp = false }: MessageBubbleProps) {
+export default function MessageBubble({ message, isOwnMessage, showTimestamp = false, otherUserName }: MessageBubbleProps) {
   const getSenderName = () => {
     if (typeof message.senderId === 'object' && message.senderId.name) {
       return message.senderId.name;
     }
-    return isOwnMessage ? 'You' : 'Other User';
+    return isOwnMessage ? 'You' : (otherUserName || 'User');
   };
 
   const getSenderImage = () => {

@@ -16,7 +16,7 @@ export default function Terms() {
               <span className="text-white font-bold text-lg">🎓</span>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </h1>
           </Link>
         </div>
@@ -94,7 +94,7 @@ export default function Terms() {
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Please read these terms carefully before using MatchApp.
+            Please read these terms carefully before using Campus Connect.
           </p>
           <p className="text-sm text-gray-500 mt-4">
             Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -114,7 +114,7 @@ export default function Terms() {
                 1. Acceptance of Terms
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                By accessing and using MatchApp, you accept and agree to be bound by the terms and provision of this agreement. 
+                By accessing and using Campus Connect, you accept and agree to be bound by the terms and provision of this agreement. 
                 If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
@@ -128,7 +128,7 @@ export default function Terms() {
                 2. Eligibility
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                MatchApp is designed exclusively for college and university students. To use our service, you must:
+                Campus Connect is designed exclusively for college and university students. To use our service, you must:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                 <li>Be at least 18 years old</li>
@@ -147,7 +147,7 @@ export default function Terms() {
                 3. User Conduct
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                You agree to use MatchApp in a respectful and appropriate manner. You will not:
+                You agree to use Campus Connect in a respectful and appropriate manner. You will not:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                 <li>Post offensive, inappropriate, or harmful content</li>
@@ -156,7 +156,7 @@ export default function Terms() {
                 <li>Use the platform for commercial purposes without permission</li>
                 <li>Attempt to access other users' accounts or personal information</li>
                 <li>Share contact information or personal details in public profiles</li>
-                <li>Use the platform for dating or romantic purposes (academic and platonic connections only)</li>
+                <li>Use the platform for inappropriate purposes (academic and professional networking only)</li>
               </ul>
             </section>
 
@@ -189,7 +189,7 @@ export default function Terms() {
                 5. Content Ownership
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                You retain ownership of all content you post on MatchApp. However, by posting content, you grant us a 
+                You retain ownership of all content you post on Campus Connect. However, by posting content, you grant us a 
                 license to use, display, and distribute your content within the platform for the purpose of providing 
                 our services. You are responsible for ensuring you have the right to post any content you share.
               </p>
@@ -223,7 +223,7 @@ export default function Terms() {
                 7. Disclaimer
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                MatchApp is provided "as is" without warranties of any kind. We do not guarantee that you will find 
+                Campus Connect is provided "as is" without warranties of any kind. We do not guarantee that you will find 
                 suitable study partners or that all users are who they claim to be. Users interact at their own risk, 
                 and we encourage meeting in public, campus locations for safety.
               </p>
@@ -239,7 +239,7 @@ export default function Terms() {
               </h2>
               <p className="text-gray-700 leading-relaxed">
                 We may update these terms from time to time. When we do, we will post the updated terms on this page 
-                and update the "Last updated" date. Your continued use of MatchApp after any changes constitutes 
+                and update the "Last updated" date. Your continued use of Campus Connect after any changes constitutes 
                 acceptance of the new terms.
               </p>
             </section>
@@ -254,7 +254,7 @@ export default function Terms() {
               </h2>
               <p className="text-gray-700 leading-relaxed">
                 If you have any questions about these Terms of Service, please contact us through our support channels 
-                or visit our About page for more information about MatchApp.
+                or visit our About page for more information about Campus Connect.
               </p>
             </section>
 
@@ -266,7 +266,7 @@ export default function Terms() {
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl p-8 text-white">
             <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
             <p className="text-blue-100 mb-6">
-              By using MatchApp, you agree to these terms and can start connecting with your campus community.
+              By using Campus Connect, you agree to these terms and can start connecting with your campus community.
             </p>
             {session ? (
               <Link
@@ -295,7 +295,7 @@ export default function Terms() {
               <span className="text-white text-sm">🎓</span>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </span>
           </div>
           <p className="text-gray-600 mb-6">Building campus friendships through shared interests.</p>
@@ -306,7 +306,7 @@ export default function Terms() {
             <Link href="/about" className="hover:text-blue-600 transition-colors">About</Link>
           </div>
           <p className="text-xs text-gray-400 mt-6">
-            © 2024 MatchApp. Made with 🎓 for campus connections.
+            © 2024 Campus Connect. Made with 🎓 for campus connections.
           </p>
         </div>
       </footer>

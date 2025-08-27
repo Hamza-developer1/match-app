@@ -46,6 +46,22 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { name, image, profile } = body;
 
+    // Server-side validation for required fields
+    const errors = [];
+    if (!name?.trim()) errors.push('Name is required');
+    if (!profile?.university?.trim()) errors.push('University is required');
+    if (!profile?.year) errors.push('Year is required');
+    if (!profile?.major?.trim()) errors.push('Major is required');
+    if (!profile?.interests?.length) errors.push('At least one interest is required');
+    if (!profile?.bio?.trim()) errors.push('Bio is required');
+
+    if (errors.length > 0) {
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: errors 
+      }, { status: 400 });
+    }
+
     await connectDB();
 
     // Optimized update with projection

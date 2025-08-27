@@ -89,8 +89,8 @@ export function useSocket() {
 
         // Show browser notification if supported
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("New Match! 🎉", {
-            body: "You have a new mutual match on MatchApp!",
+          new Notification("New Connection! 🎉", {
+            body: "You have a new mutual connection on Campus Connect!",
             icon: "/icon.svg",
           });
         }
@@ -102,8 +102,8 @@ export function useSocket() {
 
         // Show browser notification
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("Someone liked you! 💙", {
-            body: "Check out your new like on MatchApp!",
+          new Notification("Someone is interested! ✅", {
+            body: "Check out your new connection interest on Campus Connect!",
             icon: "/icon.svg",
           });
         }

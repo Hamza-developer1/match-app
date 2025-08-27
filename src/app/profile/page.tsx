@@ -113,6 +113,20 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    const errors = [];
+    if (!formData.name.trim()) errors.push('Name is required');
+    if (!formData.profile.university.trim()) errors.push('University is required');
+    if (!formData.profile.year) errors.push('Year is required');
+    if (!formData.profile.major.trim()) errors.push('Major is required');
+    if (formData.profile.interests.length === 0) errors.push('At least one interest is required');
+    if (!formData.profile.bio.trim()) errors.push('Bio is required');
+
+    if (errors.length > 0) {
+      alert('Please fill in all required fields:\n\n• ' + errors.join('\n• '));
+      return;
+    }
+
     try {
       const response = await fetch('/api/profile', {
         method: 'PUT',
@@ -126,9 +140,18 @@ export default function ProfilePage() {
         const data = await response.json();
         setUser(data.user);
         setEditing(false);
+        alert('Profile updated successfully! ✅');
+      } else {
+        const errorData = await response.json();
+        if (errorData.details) {
+          alert('Validation failed:\n\n• ' + errorData.details.join('\n• '));
+        } else {
+          alert('Failed to update profile: ' + errorData.error);
+        }
       }
     } catch (error) {
       console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
     }
   };
 
@@ -253,7 +276,7 @@ export default function ProfilePage() {
             <span className="text-white font-bold text-lg">🎓</span>
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            MatchApp
+            Campus Connect
           </h1>
         </Link>
       </header>
@@ -303,6 +326,16 @@ export default function ProfilePage() {
           {editing ? (
             /* Edit Form */
             <div className="space-y-6">
+              {/* Required fields notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600">ℹ️</span>
+                  <p className="text-sm text-blue-800">
+                    <span className="text-red-500">*</span> indicates required fields. Profile picture is optional.
+                  </p>
+                </div>
+              </div>
+              
               {/* Hidden file input */}
               <input
                 type="file"
@@ -328,19 +361,26 @@ export default function ProfilePage() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
+                  required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                  placeholder="Enter your full name"
                 />
               </div>
 
               <div className="relative" ref={universityRef}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">University</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  University <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
+                  required
                   value={universitySearch}
                   onChange={(e) => {
                     setUniversitySearch(e.target.value);
@@ -368,8 +408,11 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Year <span className="text-red-500">*</span>
+                  </label>
                   <select
+                    required
                     value={formData.profile.year || ''}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -388,9 +431,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="relative" ref={majorRef}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Major</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Major <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
+                    required
                     value={majorSearch}
                     onChange={(e) => {
                       setMajorSearch(e.target.value);
@@ -418,7 +464,9 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Interests <span className="text-red-500">*</span> <span className="text-sm text-gray-500">(at least 1 required)</span>
+                </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {formData.profile.interests.map((interest, index) => (
                     <span
@@ -449,8 +497,11 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bio <span className="text-red-500">*</span>
+                </label>
                 <textarea
+                  required
                   value={formData.profile.bio}
                   onChange={(e) => setFormData({
                     ...formData,
@@ -459,7 +510,7 @@ export default function ProfilePage() {
                   rows={4}
                   maxLength={500}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  placeholder="Tell others about yourself..."
+                  placeholder="Tell others about yourself... (required)"
                 />
                 <p className="text-sm text-gray-500 mt-1">
                   {formData.profile.bio?.length || 0}/500 characters

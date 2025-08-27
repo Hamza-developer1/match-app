@@ -1,7 +1,7 @@
-# TypeScript Guide for MatchApp
+# TypeScript Guide for Campus Connect
 
 ## Overview
-This guide explains all TypeScript concepts, patterns, and interfaces used in the MatchApp project. It's designed to help you understand both the TypeScript syntax and why specific type decisions were made.
+This guide explains all TypeScript concepts, patterns, and interfaces used in the Campus Connect project. It's designed to help you understand both the TypeScript syntax and why specific type decisions were made.
 
 ## Table of Contents
 1. [Basic TypeScript Concepts Used](#basic-typescript-concepts-used)

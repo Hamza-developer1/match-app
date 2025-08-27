@@ -118,6 +118,9 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       // Store the connection
       connectedUsers.set(userId, socket.id);
 
+      // Update user's last active timestamp
+      User.findByIdAndUpdate(userId, { lastActive: new Date() }).exec();
+
       // Join a room specific to this user
       socket.join(`user:${userId}`);
 
@@ -125,6 +128,8 @@ export async function initializeWebSocket(req: ExtendedNextApiRequest, res: any)
       socket.on('disconnect', () => {
         console.log(`User ${userEmail} disconnected`);
         connectedUsers.delete(userId);
+        // Update user's last active timestamp when they disconnect
+        User.findByIdAndUpdate(userId, { lastActive: new Date() }).exec();
       });
 
       // Handle user going online/offline

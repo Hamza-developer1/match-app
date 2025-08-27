@@ -110,7 +110,7 @@ const addInterest = (interest) => {
 
 #### What It Does
 - Shows other student profiles in a Tinder-like interface
-- Three actions: Like ❤️, Reject ❌, Skip ⏭️
+- Three actions: Connect ✅, Reject ❌, Skip ⏭️
 - Detects mutual likes and shows match notifications
 - Smart filtering prevents seeing same profiles repeatedly
 
@@ -126,7 +126,7 @@ Discovery Algorithm:
 
 #### Action Types Explained
 
-**Like Action (❤️)**
+**Connect Action (✅)**
 ```typescript
 // Store the like action
 await Match.create({

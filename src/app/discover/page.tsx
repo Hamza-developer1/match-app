@@ -156,7 +156,7 @@ export default function DiscoverPage() {
             <span className="text-white font-bold text-lg">🎓</span>
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            MatchApp
+            Campus Connect
           </h1>
         </Link>
         

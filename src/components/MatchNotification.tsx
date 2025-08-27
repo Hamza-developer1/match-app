@@ -41,7 +41,7 @@ export default function MatchNotification({ onMatchesUpdate }: MatchNotification
                 </div>
               ) : (
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-lg">💙</span>
+                  <span className="text-white text-lg">✅</span>
                 </div>
               )}
             </div>
@@ -49,7 +49,7 @@ export default function MatchNotification({ onMatchesUpdate }: MatchNotification
             <div className="ml-3 flex-1">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-semibold text-gray-900">
-                  {notification.type === 'mutual_match' ? "It's a Match! 🎉" : "New Like! 💙"}
+                  {notification.type === 'mutual_match' ? "It's a Connection! 🎉" : "New Interest! ✅"}
                 </h4>
                 <button
                   onClick={() => markNotificationAsRead(index)}
@@ -61,8 +61,8 @@ export default function MatchNotification({ onMatchesUpdate }: MatchNotification
               
               <p className="text-sm text-gray-600 mt-1">
                 {notification.type === 'mutual_match' 
-                  ? `You and ${notification.match?.user?.name || 'someone'} liked each other!`
-                  : `${notification.liker?.name || 'Someone'} liked your profile!`
+                  ? `You and ${notification.match?.user?.name || 'someone'} are now connected!`
+                  : `${notification.liker?.name || 'Someone'} is interested in connecting!`
                 }
               </p>
               
@@ -76,7 +76,7 @@ export default function MatchNotification({ onMatchesUpdate }: MatchNotification
                   }}
                   className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  {notification.type === 'mutual_match' ? 'View Match' : 'See Profile'}
+                  {notification.type === 'mutual_match' ? 'View Connection' : 'See Profile'}
                 </button>
                 <button
                   onClick={() => markNotificationAsRead(index)}

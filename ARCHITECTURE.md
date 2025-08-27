@@ -1,7 +1,7 @@
-# MatchApp Architecture Documentation
+# Campus Connect Architecture Documentation
 
 ## Overview
-MatchApp is a student networking platform built with Next.js 13+ (App Router), MongoDB, and NextAuth.js. It allows college students to discover study buddies based on shared interests and academic information.
+Campus Connect is a student networking platform built with Next.js 13+ (App Router), MongoDB, and NextAuth.js. It allows college students to discover study buddies based on shared interests and academic information.
 
 ## Tech Stack
 - **Frontend**: Next.js 13+ with App Router, React, TypeScript, Tailwind CSS
@@ -51,7 +51,7 @@ src/
 
 ### 3. Discovery System
 - **Smart Filtering**: Shows relevant profiles only
-- **Three Actions**: Like ❤️, Reject ❌, Skip ⏭️
+- **Three Actions**: Connect ✅, Reject ❌, Skip ⏭️
 - **Match Detection**: Notifies when mutual likes occur
 - **Persistence**: Remembers user decisions
 
@@ -176,7 +176,7 @@ const [matchMessage, setMatchMessage] = useState('')
 
 ### 3. Like Action Flow
 ```
-1. User clicks ❤️ button → 
+1. User clicks ✅ button → 
 2. POST /api/discover { targetUserId, action: 'like' } → 
 3. Save Match record to MongoDB → 
 4. Check for reciprocal like → 

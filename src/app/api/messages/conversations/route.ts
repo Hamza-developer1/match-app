@@ -5,6 +5,7 @@ import connectDB from "@/lib/mongodb";
 import MutualMatch from "@/models/MutualMatch";
 import Message from "@/models/Message";
 import User from "@/models/User";
+import Match from "@/models/Match";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       matches.map(async (match) => {
         const otherUserId =
           match.user1Id === userId ? match.user2Id : match.user1Id;
-        const otherUser = await User.findById(otherUserId).select("name image");
+        const otherUser = await User.findById(otherUserId).select("name image email profile lastActive");
 
         // Get the latest message for this conversation
         const latestMessage = await Message.findOne({
@@ -73,9 +74,50 @@ export async function GET(request: NextRequest) {
 
     const filteredConversations = conversations.filter((conv) => conv.otherUser);
 
+    // Get pending connections (users this user liked but didn't get liked back yet)
+    const pendingLikes = await Match.find({
+      userId: userId,
+      action: 'like'
+    });
+
+    const pendingConnections = await Promise.all(
+      pendingLikes
+        .filter(like => {
+          // Only include if it's not already a mutual match
+          return !filteredConversations.some(conv => 
+            conv.otherUser._id.toString() === like.targetUserId
+          );
+        })
+        .map(async (like) => {
+          const otherUser = await User.findById(like.targetUserId).select("name image email profile lastActive");
+          if (!otherUser) return null;
+
+          return {
+            matchId: null, // No match ID since it's not a mutual match yet
+            otherUser,
+            matchedAt: like.createdAt,
+            lastMessageAt: null,
+            latestMessage: null,
+            unreadCount: 0,
+            userSeen: true,
+            status: 'pending' // Add status field
+          };
+        })
+    );
+
+    const validPendingConnections = pendingConnections.filter(conn => conn !== null);
+
+    // Add status to mutual matches
+    const conversationsWithStatus = filteredConversations.map(conv => ({
+      ...conv,
+      status: 'accepted'
+    }));
+
+    const allConnections = [...conversationsWithStatus, ...validPendingConnections];
+
     return NextResponse.json({
       success: true,
-      conversations: filteredConversations,
+      conversations: allConnections,
     });
   } catch (error) {
     console.error("Error fetching conversations:", error);

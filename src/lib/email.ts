@@ -19,7 +19,7 @@ interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions) {
   const mailOptions = {
-    from: `${process.env.EMAIL_FROM_NAME || "MatchApp"} <${
+    from: `${process.env.EMAIL_FROM_NAME || "Campus Connect"} <${
       process.env.EMAIL_FROM || process.env.SMTP_USER
     }>`,
     to: options.to,
@@ -48,21 +48,21 @@ export async function sendPasswordResetEmail(
   }/auth/reset-password?token=${resetToken}`;
 
   const mailOptions = {
-    from: `${process.env.EMAIL_FROM_NAME || "MatchApp"} <${
+    from: `${process.env.EMAIL_FROM_NAME || "Campus Connect"} <${
       process.env.EMAIL_FROM || process.env.SMTP_USER
     }>`,
     to: email,
-    subject: "Reset Your MatchApp Password",
+    subject: "Reset Your Campus Connect Password",
     html: `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #3b82f6; margin: 0;">🎓 MatchApp</h1>
+          <h1 style="color: #3b82f6; margin: 0;">🎓 Campus Connect</h1>
         </div>
         
         <h2 style="color: #374151; margin-bottom: 20px;">Reset Your Password</h2>
         
         <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">
-          We received a request to reset your password for your MatchApp account. 
+          We received a request to reset your password for your Campus Connect account. 
           Click the button below to create a new password:
         </p>
         
@@ -97,7 +97,7 @@ export async function sendPasswordResetEmail(
       </div>
     `,
     text: `
-Reset Your MatchApp Password
+Reset Your Campus Connect Password
 
 We received a request to reset your password. Click the link below to create a new password:
 

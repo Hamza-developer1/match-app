@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Student Match App",
-  description: "Connect with fellow students for study sessions and social activities",
+  title: "Campus Connect",
+  description: "Connect with fellow students for academic collaboration and campus activities",
 };
 
 export default function RootLayout({

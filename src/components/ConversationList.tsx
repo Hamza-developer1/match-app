@@ -62,7 +62,7 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
               <span className="text-4xl">💬</span>
             </div>
             <p className="text-sm">No conversations yet</p>
-            <p className="text-xs text-gray-400 mt-1">Start matching to begin chatting!</p>
+            <p className="text-xs text-gray-400 mt-1">Start connecting to begin chatting!</p>
           </div>
         ) : (
           conversations.map((conversation) => (
@@ -85,7 +85,7 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
                   ) : (
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center">
                       <span className="text-white font-semibold text-lg">
-                        {conversation.otherUser.name.charAt(0).toUpperCase()}
+                        {(conversation.otherUser?.name || 'U').charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
@@ -102,7 +102,7 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">
-                      {conversation.otherUser.name}
+                      {conversation.otherUser?.name || 'Unknown User'}
                     </h3>
                     <span className="text-xs text-gray-500">
                       {formatLastMessageTime(conversation.lastMessageAt)}
@@ -118,7 +118,7 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
                     </p>
                   ) : (
                     <p className="text-sm text-gray-400 mt-1">
-                      New match! Say hello 👋
+                      New connection! Say hello 👋
                     </p>
                   )}
                 </div>

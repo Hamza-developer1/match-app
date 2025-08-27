@@ -16,7 +16,7 @@ export default function Privacy() {
               <span className="text-white font-bold text-lg">🎓</span>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </h1>
           </Link>
         </div>
@@ -114,7 +114,7 @@ export default function Privacy() {
                 Our Commitment to Privacy
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                At MatchApp, we understand that your privacy is fundamental to your trust in our platform. This Privacy Policy 
+                At Campus Connect, we understand that your privacy is fundamental to your trust in our platform. This Privacy Policy 
                 explains how we collect, use, protect, and handle your personal information when you use our campus connection service.
               </p>
             </section>
@@ -309,7 +309,7 @@ export default function Privacy() {
                 Children's Privacy
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                MatchApp is designed for college students aged 18 and older. We do not knowingly collect personal 
+                Campus Connect is designed for college students aged 18 and older. We do not knowingly collect personal 
                 information from anyone under 18. If we become aware that we have collected personal information 
                 from someone under 18, we will promptly delete such information.
               </p>
@@ -326,7 +326,7 @@ export default function Privacy() {
               <p className="text-gray-700 leading-relaxed">
                 We may update this Privacy Policy from time to time to reflect changes in our practices or legal 
                 requirements. When we make significant changes, we will notify you via email or through the platform. 
-                Your continued use of MatchApp after any changes indicates your acceptance of the updated policy.
+                Your continued use of Campus Connect after any changes indicates your acceptance of the updated policy.
               </p>
             </section>
 
@@ -382,7 +382,7 @@ export default function Privacy() {
               <span className="text-white text-sm">🎓</span>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </span>
           </div>
           <p className="text-gray-600 mb-6">Building campus friendships through shared interests.</p>
@@ -393,7 +393,7 @@ export default function Privacy() {
             <Link href="/about" className="hover:text-blue-600 transition-colors">About</Link>
           </div>
           <p className="text-xs text-gray-400 mt-6">
-            © 2024 MatchApp. Made with 🎓 for campus connections.
+            © 2024 Campus Connect. Made with 🎓 for campus connections.
           </p>
         </div>
       </footer>

@@ -15,11 +15,20 @@ export interface Message {
 }
 
 export interface Conversation {
-  matchId: string;
+  matchId: string | null;
   otherUser: {
     _id: string;
     name: string;
     image?: string;
+    email: string;
+    lastActive?: Date;
+    profile?: {
+      university?: string;
+      year?: number;
+      major?: string;
+      interests?: string[];
+      bio?: string;
+    };
   };
   matchedAt: Date;
   lastMessageAt?: Date;
@@ -31,6 +40,7 @@ export interface Conversation {
   };
   unreadCount: number;
   userSeen: boolean;
+  status?: 'accepted' | 'pending';
 }
 
 export interface TypingUser {

@@ -109,10 +109,10 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      New match notifications
+                      New connection notifications
                     </label>
                     <div className="text-xs text-gray-500">
-                      Get notified when you have a new match
+                      Get notified when you have a new connection
                     </div>
                   </div>
                   <input

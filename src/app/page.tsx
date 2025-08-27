@@ -40,7 +40,7 @@ export default function Home() {
                 <span className="text-white font-bold text-lg">🎓</span>
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                MatchApp
+                Campus Connect
               </h1>
             </Link>
           </div>
@@ -55,6 +55,10 @@ export default function Home() {
                 <Link href="/discover" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center space-x-1">
                   <span>🔍</span>
                   <span>Discover</span>
+                </Link>
+                <Link href="/connections" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center space-x-1">
+                  <span>🤝</span>
+                  <span>Connections</span>
                 </Link>
                 <Link href="/profile" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center space-x-1">
                   <span>👤</span>
@@ -146,6 +150,14 @@ export default function Home() {
                         View Profile
                       </Link>
                       <Link
+                        href="/connections"
+                        className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        <span className="mr-3">🤝</span>
+                        My Connections
+                      </Link>
+                      <Link
                         href="/settings"
                         className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                         onClick={() => setIsProfileDropdownOpen(false)}
@@ -231,6 +243,13 @@ export default function Home() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     🔍 Discover
+                  </Link>
+                  <Link
+                    href="/connections"
+                    className="text-gray-600 hover:text-blue-600 transition-colors px-2 py-1"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    🤝 Connections
                   </Link>
                   <Link
                     href="/profile"
@@ -410,7 +429,7 @@ export default function Home() {
         <div className="bg-white/60 backdrop-blur-sm py-20">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Why Choose MatchApp for Student Networking?
+              Why Choose Campus Connect for Student Networking?
             </h2>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -465,7 +484,7 @@ export default function Home() {
               <span className="text-white text-sm">🎓</span>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              MatchApp
+              Campus Connect
             </span>
           </div>
           <p className="text-gray-600 mb-6">
@@ -498,7 +517,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="text-xs text-gray-400 mt-6">
-            © 2025 MatchApp. Made with 🎓 for campus connections.
+            © 2025 Campus Connect. Made with 🎓 for campus connections.
           </p>
         </div>
       </footer>

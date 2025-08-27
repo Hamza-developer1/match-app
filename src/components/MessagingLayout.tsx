@@ -44,7 +44,7 @@ export default function MessagingLayout() {
                 Select a conversation
               </h3>
               <p className="text-gray-500 max-w-sm">
-                Choose a conversation from the sidebar to start messaging your matches
+                Choose a conversation from the sidebar to start messaging your connections
               </p>
             </div>
           </div>

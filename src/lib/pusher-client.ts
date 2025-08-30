@@ -164,9 +164,18 @@ class PusherManager {
         }
 
         // Only disconnect if no subscribers and connection is active
-        if (this.pusher && this.pusher.connection.state === 'connected') {
+        if (this.pusher && 
+            (this.pusher.connection.state === 'connected' || this.pusher.connection.state === 'connecting')) {
+          const pusherToDisconnect = this.pusher;
           try {
-            this.pusher.disconnect();
+            // Add small delay to avoid WebSocket closing state error
+            setTimeout(() => {
+              if (pusherToDisconnect && 
+                  pusherToDisconnect.connection.state !== 'disconnected' &&
+                  pusherToDisconnect.connection.state !== 'disconnecting') {
+                pusherToDisconnect.disconnect();
+              }
+            }, 50);
           } catch (error) {
             console.warn('Error during Pusher disconnect:', error);
           }

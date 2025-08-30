@@ -4,7 +4,6 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import MatchNotification from "../components/MatchNotification";
-import PusherTest from "../components/PusherTest";
 import { usePusherMessaging } from "../hooks/usePusherMessaging";
 
 export default function Home() {
@@ -31,8 +30,6 @@ export default function Home() {
       {/* Real-time Match Notifications */}
       {session && <MatchNotification onMatchesUpdate={() => {}} />}
       
-      {/* Pusher Test Component - Remove this after testing */}
-      {session && <PusherTest />}
       
       {/* Header with Comprehensive Navigation */}
       <header className="w-full p-6 backdrop-blur-sm bg-white/80 border-b border-gray-100 sticky top-0 z-50">

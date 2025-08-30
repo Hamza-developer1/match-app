@@ -7,11 +7,10 @@ export async function middleware(request: NextRequest) {
   
   // Handle POST requests to root that are causing 405 errors
   if (pathname === '/' && request.method === 'POST') {
-    console.log('Caught POST request to root in middleware:', {
-      url: request.url,
-      userAgent: request.headers.get('user-agent'),
-      referer: request.headers.get('referer'),
-    });
+    // Only log in development to reduce noise
+    if (process.env.NODE_ENV === 'development') {
+      console.log('POST to root from:', request.headers.get('referer') || 'unknown');
+    }
     
     return new NextResponse(
       JSON.stringify({ message: 'Request handled by middleware' }),
@@ -24,10 +23,10 @@ export async function middleware(request: NextRequest) {
     );
   }
   
-  // Apply rate limiting to API routes, except WebSocket endpoint
-  if (pathname.startsWith('/api/') && pathname !== '/api/socket') {
+  // Apply rate limiting to API routes
+  if (pathname.startsWith('/api/')) {
     // Stricter rate limiting for auth routes, except frequent-use endpoints
-    const frequentAuthEndpoints = ['/api/auth/session', '/api/auth/websocket-token', '/api/auth/providers'];
+    const frequentAuthEndpoints = ['/api/auth/session', '/api/auth/providers'];
     if (pathname.startsWith('/api/auth/') && !frequentAuthEndpoints.includes(pathname)) {
       const rateLimitResponse = await authRateLimit(request)
       if (rateLimitResponse) return rateLimitResponse
@@ -60,7 +59,6 @@ export async function middleware(request: NextRequest) {
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/auth/[...nextauth]',
-    '/api/socket',
     '/api/profile',
     '/api/discover',
     '/api/matches',

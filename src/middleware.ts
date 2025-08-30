@@ -5,6 +5,25 @@ import { apiRateLimit, authRateLimit } from './lib/rate-limit'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
+  // Handle POST requests to root that are causing 405 errors
+  if (pathname === '/' && request.method === 'POST') {
+    console.log('Caught POST request to root in middleware:', {
+      url: request.url,
+      userAgent: request.headers.get('user-agent'),
+      referer: request.headers.get('referer'),
+    });
+    
+    return new NextResponse(
+      JSON.stringify({ message: 'Request handled by middleware' }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+  
   // Apply rate limiting to API routes, except WebSocket endpoint
   if (pathname.startsWith('/api/') && pathname !== '/api/socket') {
     // Stricter rate limiting for auth routes, except frequent-use endpoints

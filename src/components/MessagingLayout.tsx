@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Conversation } from '../hooks/useMessaging';
+import { Conversation } from '../hooks/usePusherMessaging';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 

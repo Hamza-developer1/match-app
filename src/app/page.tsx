@@ -4,13 +4,14 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import MatchNotification from "../components/MatchNotification";
-import { useMessaging } from "../hooks/useMessaging";
+import PusherTest from "../components/PusherTest";
+import { usePusherMessaging } from "../hooks/usePusherMessaging";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const { conversations, fetchConversations } = useMessaging();
+  const { conversations, fetchConversations } = usePusherMessaging();
   const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   
   // Calculate total unread messages
@@ -29,6 +30,9 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Real-time Match Notifications */}
       {session && <MatchNotification onMatchesUpdate={() => {}} />}
+      
+      {/* Pusher Test Component - Remove this after testing */}
+      {session && <PusherTest />}
       
       {/* Header with Comprehensive Navigation */}
       <header className="w-full p-6 backdrop-blur-sm bg-white/80 border-b border-gray-100 sticky top-0 z-50">

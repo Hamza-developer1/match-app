@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Message } from '../hooks/useMessaging';
+import { Message } from '../hooks/usePusherMessaging';
 
 interface MessageBubbleProps {
   message: Message;

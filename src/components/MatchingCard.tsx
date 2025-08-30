@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useSocket } from '../hooks/useSocket';
 
 interface User {
   _id: string;
@@ -25,7 +24,6 @@ interface MatchingCardProps {
 
 export default function MatchingCard({ user, onAction, isLoading }: MatchingCardProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const { socket } = useSocket();
 
   const handleAction = async (action: 'like' | 'reject' | 'skip') => {
     if (isLoading || actionLoading) return;

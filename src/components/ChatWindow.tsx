@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useMessaging, Conversation, Message } from '../hooks/useMessaging';
+import { usePusherMessaging, Conversation, Message } from '../hooks/usePusherMessaging';
 import MessageBubble from './MessageBubble';
 
 interface ChatWindowProps {
@@ -12,7 +12,7 @@ interface ChatWindowProps {
 
 export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const { data: session } = useSession();
-  const { messages, fetchMessages, sendMessage, sendTyping, markAsRead, typingUsers } = useMessaging();
+  const { messages, fetchMessages, sendMessage, sendTyping, markAsRead, typingUsers } = usePusherMessaging();
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);

@@ -7,6 +7,7 @@ import MutualMatch from '@/models/MutualMatch';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { z } from 'zod';
+import { emitMatchNotification, emitLikeNotification } from '@/lib/pusher-notifications';
 
 const matchActionSchema = z.object({
   targetUserId: z.string().refine(
@@ -75,6 +76,17 @@ export async function POST(request: NextRequest) {
         // Get target user info for notification
         const targetUser = await User.findById(targetUserId);
         
+        // Send match notification to both users via Pusher
+        if (targetUser) {
+          emitMatchNotification(currentUser._id.toString(), targetUserId, {
+            id: mutualMatch._id,
+            user: {
+              id: targetUser._id,
+              name: targetUser.name,
+              image: targetUser.image
+            }
+          });
+        }
         
         return NextResponse.json({ 
           success: true, 
@@ -88,9 +100,18 @@ export async function POST(request: NextRequest) {
             }
           }
         });
+      } else {
+        // No mutual match yet, but send like notification to target user
+        const targetUser = await User.findById(targetUserId);
+        if (targetUser) {
+          emitLikeNotification(targetUserId, {
+            id: currentUser._id,
+            name: currentUser.name,
+            image: currentUser.image
+          });
+        }
       }
     }
-
 
     return NextResponse.json({ 
       success: true, 

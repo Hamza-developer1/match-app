@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSocket } from '../hooks/useSocket';
+import { usePusher } from '../hooks/usePusher';
 
 interface MatchNotificationProps {
   onMatchesUpdate?: () => void;
 }
 
 export default function MatchNotification({ onMatchesUpdate }: MatchNotificationProps) {
-  const { matchNotifications, markNotificationAsRead } = useSocket();
+  const { matchNotifications, markNotificationAsRead } = usePusher();
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {

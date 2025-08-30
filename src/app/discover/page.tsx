@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import MatchingCard from '../../components/MatchingCard';
 import MatchNotification from '../../components/MatchNotification';
-import { useSocket } from '../../hooks/useSocket';
+import { usePusher } from '../../hooks/usePusher';
 
 interface UserProfile {
   _id: string;
@@ -37,7 +37,7 @@ export default function DiscoverPage() {
     year: '',
     interest: ''
   });
-  const { socket, isConnected, matchNotifications } = useSocket();
+  const { pusher, isConnected, matchNotifications } = usePusher();
 
   useEffect(() => {
     setMounted(true);

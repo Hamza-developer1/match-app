@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMessaging, Conversation } from '../hooks/useMessaging';
+import { usePusherMessaging, Conversation } from '../hooks/usePusherMessaging';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ConversationListProps {
@@ -11,7 +11,7 @@ interface ConversationListProps {
 }
 
 export default function ConversationList({ onSelectConversation, selectedMatchId }: ConversationListProps) {
-  const { conversations, fetchConversations, isConnected } = useMessaging();
+  const { conversations, fetchConversations, isConnected } = usePusherMessaging();
   const router = useRouter();
 
   useEffect(() => {

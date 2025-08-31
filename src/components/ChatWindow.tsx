@@ -56,10 +56,21 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
           console.log('🔄 Polling for new messages...');
           fetchMessages(conversation.matchId);
         }
-      }, 5000);
+      }, 2000); // Reduced to 2 seconds
+      
+      // INSTANT POLLING: Check immediately when window gets focus
+      const handleFocus = () => {
+        console.log('🎯 Window focused - checking for new messages immediately');
+        fetchMessages(conversation.matchId);
+      };
+      
+      window.addEventListener('focus', handleFocus);
+      document.addEventListener('visibilitychange', handleFocus);
       
       return () => {
         clearInterval(pollInterval);
+        window.removeEventListener('focus', handleFocus);
+        document.removeEventListener('visibilitychange', handleFocus);
       };
     }
   }, [conversation.matchId, fetchMessages, markAsRead, conversation.otherUser._id]);

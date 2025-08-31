@@ -4,10 +4,14 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import MessagingLayout from '../../components/MessagingLayout';
+import { useUserActivity } from '../../hooks/useUserActivity';
 
 export default function MessagesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  
+  // Update user activity (last seen timestamp)
+  useUserActivity();
 
   useEffect(() => {
     if (status === 'loading') return;

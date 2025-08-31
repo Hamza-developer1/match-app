@@ -42,18 +42,27 @@ export async function POST(request: NextRequest) {
       targetUserId: targetUserId
     });
 
-    if (existingMatch) {
+    // Allow overriding skip actions, but block if already liked/rejected
+    if (existingMatch && existingMatch.action !== 'skip') {
       return NextResponse.json({ error: 'Already acted on this user' }, { status: 400 });
     }
 
-    // Create the match record
-    const match = new Match({
-      userId: currentUser._id,
-      targetUserId: targetUserId,
-      action: action
-    });
-
-    await match.save();
+    // Handle match record creation or update
+    let match;
+    if (existingMatch && existingMatch.action === 'skip') {
+      // Update the existing skip record
+      existingMatch.action = action;
+      existingMatch.createdAt = new Date();
+      match = await existingMatch.save();
+    } else {
+      // Create new match record
+      match = new Match({
+        userId: currentUser._id,
+        targetUserId: targetUserId,
+        action: action
+      });
+      await match.save();
+    }
 
     // If it's a like, check for mutual match
     let mutualMatch = null;
@@ -78,7 +87,7 @@ export async function POST(request: NextRequest) {
         
         // Send match notification to both users via Pusher
         if (targetUser) {
-          emitMatchNotification(currentUser._id.toString(), targetUserId, {
+          emitMatchNotification(String(currentUser._id), targetUserId, {
             id: mutualMatch._id,
             user: {
               id: targetUser._id,

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { matchId, receiverId, content, messageType = 'text', sendToSender = true } = await req.json();
+    const { matchId, receiverId, content, messageType = 'text', sendToReceiver = true, sendToSender = true } = await req.json();
     console.log('📝 Pusher API request data:', { matchId, receiverId, content, messageType });
     
     if (!matchId || !receiverId || !content) {
@@ -34,6 +34,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     console.log('👤 Found sender:', sender._id);
+
+    // Update sender's lastActive timestamp when sending a message
+    await User.findOneAndUpdate(
+      { email: session.user.email },
+      { lastActive: new Date() },
+      { upsert: false }
+    );
 
     // Verify that both users have a mutual match
     const mutualMatch = await (MutualMatch as any).findMatch(sender._id.toString(), receiverId);
@@ -74,17 +81,16 @@ export async function POST(req: NextRequest) {
       message: savedMessage // Include the full message object
     };
     
-    console.log('📤 Sending to receiver channel:', CHANNELS.USER(receiverId));
-    await pusher.trigger(CHANNELS.USER(receiverId), EVENTS.MESSAGE_RECEIVE, messageData);
-    console.log('✅ Sent to receiver');
+    if (sendToReceiver) {
+      console.log('📤 Sending to receiver channel:', CHANNELS.USER(receiverId));
+      await pusher.trigger(CHANNELS.USER(receiverId), EVENTS.MESSAGE_RECEIVE, messageData);
+      console.log('✅ Sent to receiver');
+    }
 
-    // Only send to sender if requested (for backward compatibility)
     if (sendToSender) {
       console.log('📤 Sending to sender channel:', CHANNELS.USER(sender._id.toString()));
       await pusher.trigger(CHANNELS.USER(sender._id.toString()), EVENTS.MESSAGE_RECEIVE, messageData);
       console.log('✅ Sent to sender');
-    } else {
-      console.log('⏭️ Skipping sender (handled locally)');
     }
 
     console.log('🎉 Pusher messages sent successfully');

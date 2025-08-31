@@ -21,7 +21,10 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const conversationMessages = messages[conversation.matchId] || [];
+  const conversationMessages = conversation.matchId ? messages[conversation.matchId] || [] : [];
+  console.log('💬 ChatWindow - conversation.matchId:', conversation.matchId);
+  console.log('💬 ChatWindow - messages keys:', Object.keys(messages));
+  console.log('💬 ChatWindow - conversationMessages count:', conversationMessages.length);
   const [actualCurrentUserId, setActualCurrentUserId] = useState<string>('');
   const currentUserEmail = session?.user?.email;
   
@@ -46,12 +49,29 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       fetchMessages(conversation.matchId);
       // Mark messages as read when opening conversation
       markAsRead(conversation.matchId, conversation.otherUser._id);
+      
+      // SMART POLLING: Only poll when not typing and chat is visible
+      const pollInterval = setInterval(() => {
+        if (!isTyping && !isSending && document.visibilityState === 'visible') {
+          console.log('🔄 Polling for new messages...');
+          fetchMessages(conversation.matchId);
+        }
+      }, 5000);
+      
+      return () => {
+        clearInterval(pollInterval);
+      };
     }
   }, [conversation.matchId, fetchMessages, markAsRead, conversation.otherUser._id]);
 
   useEffect(() => {
+    console.log('💬 ChatWindow - conversationMessages CHANGED:', conversationMessages.length);
     scrollToBottom();
   }, [conversationMessages]);
+
+  useEffect(() => {
+    console.log('💬 ChatWindow - messages state CHANGED:', Object.keys(messages));
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

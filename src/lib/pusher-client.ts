@@ -74,7 +74,9 @@ class PusherManager {
         });
 
         this.userId = config.userId;
-        this.channel = this.pusher.subscribe(CHANNELS.USER(config.userId));
+        const channelName = CHANNELS.USER(config.userId);
+        console.log('🔌 Subscribing to channel:', channelName);
+        this.channel = this.pusher.subscribe(channelName);
 
         this.pusher.connection.bind('connected', () => {
           console.log('PusherManager: Connected');
@@ -115,9 +117,18 @@ class PusherManager {
   private bindAllEvents() {
     if (!this.channel) return;
 
+    console.log('🔗 Binding events for channel:', this.channel.name);
+    console.log('🔗 Event to bind:', EVENTS.MESSAGE_RECEIVE);
+    console.log('🔗 Number of subscribers:', this.subscribers.size);
+
     // Bind all events for all subscribers
     this.channel.bind(EVENTS.MESSAGE_RECEIVE, (data: any) => {
-      this.subscribers.forEach(config => config.onMessage?.(data));
+      console.log('🔥 PUSHER EVENT RECEIVED IN MANAGER:', data);
+      console.log('🔥 Notifying', this.subscribers.size, 'subscribers');
+      this.subscribers.forEach((config, id) => {
+        console.log('🔥 Notifying subscriber:', id);
+        config.onMessage?.(data);
+      });
     });
 
     this.channel.bind(EVENTS.TYPING_USER_TYPING, (data: any) => {

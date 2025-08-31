@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import MatchNotification from "../components/MatchNotification";
 import { usePusherMessaging } from "../hooks/usePusherMessaging";
+import { useUserActivity } from "../hooks/useUserActivity";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -12,6 +13,9 @@ export default function Home() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const { conversations, fetchConversations } = usePusherMessaging();
   const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  
+  // Update user activity (last seen timestamp)
+  useUserActivity();
   
   // Calculate total unread messages
   useEffect(() => {

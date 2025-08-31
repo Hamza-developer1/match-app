@@ -21,6 +21,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Update the current user's lastActive timestamp when fetching conversations
+    await User.findOneAndUpdate(
+      { email: session.user.email },
+      { lastActive: new Date() },
+      { upsert: false }
+    );
+
     const userId = user._id?.toString();
     if (!userId) {
       return NextResponse.json({ error: "User ID not found" }, { status: 400 });

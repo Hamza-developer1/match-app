@@ -58,7 +58,7 @@ export function usePusherMessaging() {
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch user ID from profile API
+  // Fetch user ID from profile API and clear state when user changes
   useEffect(() => {
     if (session?.user?.email && !userId) {
       fetch('/api/profile')
@@ -71,8 +71,26 @@ export function usePusherMessaging() {
         .catch(error => {
           console.error('Error fetching user profile for messaging:', error);
         });
+    } else if (!session?.user?.email && userId) {
+      // User logged out - clear all state
+      console.log('🧹 Clearing message state on user logout');
+      setUserId(null);
+      setMessages({});
+      setConversations([]);
+      setTypingUsers([]);
+      setIsConnected(false);
     }
   }, [session?.user?.email, userId]);
+
+  // Clear messages when user changes (different user logs in)
+  useEffect(() => {
+    if (userId) {
+      console.log('🔄 New user session detected - clearing old messages for user:', userId);
+      setMessages({});
+      setConversations([]);
+      setTypingUsers([]);
+    }
+  }, [userId]);
 
   // Initialize Pusher connection
   useEffect(() => {
@@ -84,9 +102,15 @@ export function usePusherMessaging() {
       pusherManager.connect({
         userId,
         onMessage: (data: any) => {
+          console.log('🔥🔥🔥 PUSHER CALLBACK TRIGGERED 🔥🔥🔥');
+          console.log('🔥 Callback data:', data);
+          console.log('🔥 Callback userId:', userId);
           console.log('📨 PUSHER MESSAGE RECEIVED:', data);
           console.log('📨 Current user ID:', userId);
           const { matchId, message, _id, senderId, content, messageType, timestamp } = data;
+          
+          // Process all messages for debugging
+          console.log('🔥 Processing message - senderId:', senderId, 'userId:', userId);
           
           // Use the complete message object if available, otherwise construct from data
           const messageToAdd: Message = message || {
@@ -100,17 +124,30 @@ export function usePusherMessaging() {
             createdAt: new Date(timestamp),
           };
           
-          console.log('📨 Adding message to state:', messageToAdd);
+          console.log('📨 Adding incoming message to state:', messageToAdd);
           
           setMessages(prev => {
+            // Check for duplicates before adding
+            const existingMessages = prev[matchId] || [];
+            const isDuplicate = existingMessages.some(msg => 
+              msg._id === messageToAdd._id
+            );
+            
+            if (isDuplicate) {
+              console.log('⏭️ Skipping duplicate message');
+              return prev;
+            }
+            
             const updated = {
               ...prev,
               [matchId]: [
-                ...(prev[matchId] || []),
+                ...existingMessages,
                 messageToAdd
               ]
             };
             console.log('📨 Updated messages state for match', matchId, ':', updated[matchId]);
+            console.log('📨 FORCING STATE UPDATE - Before:', Object.keys(prev));
+            console.log('📨 FORCING STATE UPDATE - After:', Object.keys(updated));
             return updated;
           });
 
@@ -198,10 +235,36 @@ export function usePusherMessaging() {
       const response = await fetch(`/api/messages/${matchId}?page=${page}&limit=50`);
       if (response.ok) {
         const data = await response.json();
-        setMessages(prev => ({
-          ...prev,
-          [matchId]: page === 1 ? data.messages : [...(prev[matchId] || []), ...data.messages]
-        }));
+        setMessages(prev => {
+          const existing = prev[matchId] || [];
+          
+          // If this is polling (page 1), merge new messages with existing ones
+          if (page === 1) {
+            // Create a map of existing messages by ID for deduplication
+            const existingMap = new Map(existing.map(msg => [msg._id, msg]));
+            
+            // Add new messages that don't already exist
+            const newMessages = data.messages.filter((msg: Message) => !existingMap.has(msg._id));
+            
+            // Combine existing + new and sort by createdAt
+            const allMessages = [...existing, ...newMessages].sort(
+              (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+            
+            console.log('🔄 Polling update:', existing.length, '→', allMessages.length, 'messages');
+            
+            return {
+              ...prev,
+              [matchId]: allMessages
+            };
+          } else {
+            // For pagination, append to existing
+            return {
+              ...prev,
+              [matchId]: [...existing, ...data.messages]
+            };
+          }
+        });
         return data;
       }
     } catch (error) {
@@ -214,8 +277,29 @@ export function usePusherMessaging() {
     console.log('🚀 sendMessage called:', { matchId, receiverId, content, messageType });
     console.log('🔌 Pusher connection status:', isConnected);
     
+    // STEP 1: IMMEDIATELY show message to sender (optimistic update)
+    const tempMessage: Message = {
+      _id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      matchId,
+      senderId: userId || '',
+      receiverId,
+      content,
+      messageType,
+      isRead: false,
+      createdAt: new Date(),
+    };
+    
+    console.log('⚡ Adding optimistic message for sender:', tempMessage);
+    setMessages(prev => ({
+      ...prev,
+      [matchId]: [
+        ...(prev[matchId] || []),
+        tempMessage
+      ]
+    }));
+    
     try {
-      // Send message to API first (for database storage)
+      // STEP 2: Save to database
       console.log('📤 Sending to /api/messages/send...');
       const response = await fetch('/api/messages/send', {
         method: 'POST',
@@ -233,19 +317,16 @@ export function usePusherMessaging() {
         const data = await response.json();
         console.log('✅ Message saved to database:', data);
         
-        // IMMEDIATELY add the message to sender's local state
-        const newMessage = data.message;
+        // STEP 3: Update the temp message with real data
         setMessages(prev => ({
           ...prev,
-          [matchId]: [
-            ...(prev[matchId] || []),
-            newMessage
-          ]
+          [matchId]: (prev[matchId] || []).map(msg => 
+            msg._id === tempMessage._id ? data.message : msg
+          )
         }));
-        console.log('✅ Message added to sender state immediately');
         
-        // Send real-time message via Pusher (for receiver only)
-        console.log('📡 Sending to receiver via Pusher...');
+        // STEP 4: Send via Pusher to BOTH users to force it to work
+        console.log('📡 Sending via Pusher to BOTH users...');
         const pusherResponse = await fetch('/api/pusher/send-message', {
           method: 'POST',
           headers: {
@@ -256,7 +337,8 @@ export function usePusherMessaging() {
             receiverId,
             content,
             messageType,
-            sendToSender: false, // Don't send back to sender
+            sendToReceiver: true,
+            sendToSender: true, // Send to both to debug
           }),
         });
 
@@ -268,13 +350,23 @@ export function usePusherMessaging() {
         }
       } else {
         console.error('❌ Database save failed:', await response.text());
+        // Remove the optimistic message on failure
+        setMessages(prev => ({
+          ...prev,
+          [matchId]: (prev[matchId] || []).filter(msg => msg._id !== tempMessage._id)
+        }));
       }
     } catch (error) {
       console.error('❌ Error sending message:', error);
+      // Remove the optimistic message on failure
+      setMessages(prev => ({
+        ...prev,
+        [matchId]: (prev[matchId] || []).filter(msg => msg._id !== tempMessage._id)
+      }));
     }
     
     return false;
-  }, [isConnected]);
+  }, [isConnected, userId]);
 
   // Send typing indicator via Pusher API
   const sendTyping = useCallback(async (matchId: string, receiverId: string, isTyping: boolean) => {

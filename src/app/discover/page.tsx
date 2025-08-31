@@ -7,6 +7,7 @@ import Link from 'next/link';
 import MatchingCard from '../../components/MatchingCard';
 import MatchNotification from '../../components/MatchNotification';
 import { usePusher } from '../../hooks/usePusher';
+import { useUserActivity } from '../../hooks/useUserActivity';
 
 interface UserProfile {
   _id: string;
@@ -38,6 +39,9 @@ export default function DiscoverPage() {
     interest: ''
   });
   const { pusher, isConnected, matchNotifications } = usePusher();
+  
+  // Update user activity (last seen timestamp)
+  useUserActivity();
 
   useEffect(() => {
     setMounted(true);

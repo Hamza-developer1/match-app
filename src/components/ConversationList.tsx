@@ -15,7 +15,43 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
   const router = useRouter();
 
   useEffect(() => {
-    fetchConversations();
+    let lastFetch = 0;
+    const FETCH_COOLDOWN = 2000; // 2 second cooldown between fetches
+    
+    const throttledFetch = () => {
+      const now = Date.now();
+      if (now - lastFetch > FETCH_COOLDOWN) {
+        lastFetch = now;
+        fetchConversations();
+      }
+    };
+
+    // Initial fetch
+    throttledFetch();
+    
+    // Refresh conversations when component becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        throttledFetch();
+      }
+    };
+
+    // Refresh conversations when window gains focus
+    const handleFocus = () => {
+      throttledFetch();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Refresh conversations every 30 seconds
+    const interval = setInterval(throttledFetch, 30000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
   }, [fetchConversations]);
 
   const formatLastMessageTime = (date?: Date) => {
@@ -65,9 +101,9 @@ export default function ConversationList({ onSelectConversation, selectedMatchId
             <p className="text-xs text-gray-400 mt-1">Start connecting to begin chatting!</p>
           </div>
         ) : (
-          conversations.map((conversation) => (
+          conversations.map((conversation, index) => (
             <div
-              key={conversation.matchId}
+              key={conversation.matchId || `conversation-${conversation.otherUser._id}-${index}`}
               onClick={() => onSelectConversation(conversation)}
               className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
                 selectedMatchId === conversation.matchId ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''

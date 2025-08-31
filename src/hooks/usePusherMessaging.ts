@@ -84,25 +84,35 @@ export function usePusherMessaging() {
       pusherManager.connect({
         userId,
         onMessage: (data: any) => {
-          console.log('usePusherMessaging: Received message:', data);
-          const { matchId, senderId, content, messageType, timestamp } = data;
+          console.log('📨 PUSHER MESSAGE RECEIVED:', data);
+          console.log('📨 Current user ID:', userId);
+          const { matchId, message, _id, senderId, content, messageType, timestamp } = data;
           
-          setMessages(prev => ({
-            ...prev,
-            [matchId]: [
-              ...(prev[matchId] || []),
-              {
-                _id: `temp-${Date.now()}`,
-                matchId,
-                senderId,
-                receiverId: userId || '',
-                content,
-                messageType,
-                isRead: false,
-                createdAt: new Date(timestamp),
-              } as Message
-            ]
-          }));
+          // Use the complete message object if available, otherwise construct from data
+          const messageToAdd: Message = message || {
+            _id: _id || `temp-${Date.now()}`,
+            matchId,
+            senderId,
+            receiverId: userId || '',
+            content,
+            messageType,
+            isRead: false,
+            createdAt: new Date(timestamp),
+          };
+          
+          console.log('📨 Adding message to state:', messageToAdd);
+          
+          setMessages(prev => {
+            const updated = {
+              ...prev,
+              [matchId]: [
+                ...(prev[matchId] || []),
+                messageToAdd
+              ]
+            };
+            console.log('📨 Updated messages state for match', matchId, ':', updated[matchId]);
+            return updated;
+          });
 
           // Update conversation's last message
           setConversations(prev => 
@@ -201,8 +211,12 @@ export function usePusherMessaging() {
 
   // Send a message via Pusher API
   const sendMessage = useCallback(async (matchId: string, receiverId: string, content: string, messageType: 'text' | 'image' | 'emoji' = 'text') => {
+    console.log('🚀 sendMessage called:', { matchId, receiverId, content, messageType });
+    console.log('🔌 Pusher connection status:', isConnected);
+    
     try {
       // Send message to API first (for database storage)
+      console.log('📤 Sending to /api/messages/send...');
       const response = await fetch('/api/messages/send', {
         method: 'POST',
         headers: {
@@ -217,8 +231,21 @@ export function usePusherMessaging() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Message saved to database:', data);
         
-        // Send real-time message via Pusher
+        // IMMEDIATELY add the message to sender's local state
+        const newMessage = data.message;
+        setMessages(prev => ({
+          ...prev,
+          [matchId]: [
+            ...(prev[matchId] || []),
+            newMessage
+          ]
+        }));
+        console.log('✅ Message added to sender state immediately');
+        
+        // Send real-time message via Pusher (for receiver only)
+        console.log('📡 Sending to receiver via Pusher...');
         const pusherResponse = await fetch('/api/pusher/send-message', {
           method: 'POST',
           headers: {
@@ -229,28 +256,25 @@ export function usePusherMessaging() {
             receiverId,
             content,
             messageType,
+            sendToSender: false, // Don't send back to sender
           }),
         });
 
         if (pusherResponse.ok) {
-          // Add to local state
-          setMessages(prev => ({
-            ...prev,
-            [matchId]: [
-              ...(prev[matchId] || []),
-              data.message
-            ]
-          }));
-          
+          console.log('✅ Pusher message sent to receiver');
           return true;
+        } else {
+          console.error('❌ Pusher message failed:', await pusherResponse.text());
         }
+      } else {
+        console.error('❌ Database save failed:', await response.text());
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Error sending message:', error);
     }
     
     return false;
-  }, []);
+  }, [isConnected]);
 
   // Send typing indicator via Pusher API
   const sendTyping = useCallback(async (matchId: string, receiverId: string, isTyping: boolean) => {

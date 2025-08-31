@@ -18,6 +18,9 @@ class PusherManager {
   private connectionPromise: Promise<void> | null = null;
   private isConnected = false;
   private subscribers = new Map<string, PusherManagerConfig>();
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
 
   private constructor() {}
 
@@ -77,6 +80,7 @@ class PusherManager {
           console.log('PusherManager: Connected');
           this.isConnected = true;
           this.connectionPromise = null;
+          this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
           this.bindAllEvents();
           resolve();
         });
@@ -84,12 +88,14 @@ class PusherManager {
         this.pusher.connection.bind('disconnected', () => {
           console.log('PusherManager: Disconnected');
           this.isConnected = false;
+          this.handleReconnect();
         });
 
         this.pusher.connection.bind('error', (error: any) => {
           console.error('PusherManager: Connection error:', error);
           this.isConnected = false;
           this.connectionPromise = null;
+          this.handleReconnect();
           reject(error);
         });
 
@@ -97,6 +103,7 @@ class PusherManager {
           console.error('PusherManager: Connection failed');
           this.isConnected = false;
           this.connectionPromise = null;
+          this.handleReconnect();
         });
       } catch (error) {
         this.connectionPromise = null;
@@ -128,6 +135,43 @@ class PusherManager {
     this.channel.bind(EVENTS.MATCH_LIKE, (data: any) => {
       this.subscribers.forEach(config => config.onLike?.(data));
     });
+  }
+
+  private handleReconnect() {
+    // Don't reconnect if no subscribers
+    if (this.subscribers.size === 0) return;
+
+    // Clear any existing reconnect timeout
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
+    // Don't exceed max attempts
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.warn('PusherManager: Max reconnect attempts reached');
+      return;
+    }
+
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff, max 30s
+    console.log(`PusherManager: Attempting reconnect in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
+
+    this.reconnectTimeout = setTimeout(async () => {
+      this.reconnectAttempts++;
+      
+      try {
+        // Get the first subscriber config to reconnect with same user
+        const firstConfig = this.subscribers.values().next().value;
+        if (firstConfig) {
+          await this._connect(firstConfig);
+          this.reconnectAttempts = 0; // Reset on successful connection
+          console.log('PusherManager: Reconnected successfully');
+        }
+      } catch (error) {
+        console.error('PusherManager: Reconnection failed:', error);
+        this.handleReconnect(); // Try again
+      }
+    }, delay);
   }
 
   private bindEvents(config: PusherManagerConfig) {
@@ -185,6 +229,11 @@ class PusherManager {
         this.userId = null;
         this.isConnected = false;
         this.connectionPromise = null;
+        this.reconnectAttempts = 0;
+        if (this.reconnectTimeout) {
+          clearTimeout(this.reconnectTimeout);
+          this.reconnectTimeout = null;
+        }
         this.subscribers.clear();
       }
       

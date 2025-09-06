@@ -17,6 +17,9 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -75,10 +78,38 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
     }
   }, [conversation.matchId, fetchMessages, markAsRead, conversation.otherUser._id]);
 
+  // Check if user is near bottom of chat
+  const checkIfNearBottom = () => {
+    if (!chatContainerRef.current) return false;
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+    const threshold = 100; // pixels from bottom
+    return scrollHeight - scrollTop - clientHeight <= threshold;
+  };
+
+  // Handle scroll events to determine if auto-scroll should be enabled
+  const handleScroll = () => {
+    if (checkIfNearBottom()) {
+      setShouldAutoScroll(true);
+      setHasNewMessages(false); // Clear new messages indicator when user scrolls to bottom
+    } else {
+      setShouldAutoScroll(false);
+    }
+  };
+
   useEffect(() => {
     console.log('💬 ChatWindow - conversationMessages CHANGED:', conversationMessages.length);
-    scrollToBottom();
-  }, [conversationMessages]);
+    
+    // Auto-scroll only if:
+    // 1. It's the first load
+    // 2. User is near bottom and auto-scroll is enabled
+    if (isFirstLoad || shouldAutoScroll) {
+      scrollToBottom();
+      setIsFirstLoad(false);
+    } else if (conversationMessages.length > 0) {
+      // Show new messages indicator if user is scrolled up and there are new messages
+      setHasNewMessages(true);
+    }
+  }, [conversationMessages, isFirstLoad, shouldAutoScroll]);
 
   useEffect(() => {
     console.log('💬 ChatWindow - messages state CHANGED:', Object.keys(messages));
@@ -94,6 +125,7 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
     if (!newMessage.trim() || isSending) return;
 
     setIsSending(true);
+    setShouldAutoScroll(true); // Always auto-scroll when user sends a message
     const messageContent = newMessage.trim();
     setNewMessage('');
 
@@ -198,6 +230,7 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
   const sendEmoji = async (emoji: string) => {
     setIsSending(true);
+    setShouldAutoScroll(true); // Always auto-scroll when user sends an emoji
     try {
       await sendMessage(
         conversation.matchId,
@@ -215,7 +248,7 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   const quickEmojis = ['👋', '😊', '😂', '✅', '👍', '👎', '🔥', '💯'];
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white relative">
       {/* Chat Header */}
       <div className="p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
@@ -275,6 +308,7 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
       <div 
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4"
+        onScroll={handleScroll}
       >
         {conversationMessages.length === 0 ? (
           <div className="text-center py-8">
@@ -323,6 +357,25 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* New Messages Indicator */}
+      {hasNewMessages && !shouldAutoScroll && (
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
+          <button
+            onClick={() => {
+              setShouldAutoScroll(true);
+              setHasNewMessages(false);
+              scrollToBottom();
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2 transition-colors"
+          >
+            <span>New messages</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Quick Emojis */}
       <div className="px-4 py-2 border-t border-gray-100">

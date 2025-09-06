@@ -52,7 +52,7 @@ export default function MatchingCard({ user, onAction, isLoading }: MatchingCard
   return (
     <div className="max-w-sm mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
       {/* Profile Image */}
-      <div className="relative h-80 bg-gradient-to-br from-blue-400 to-indigo-500">
+      <div className="relative h-64 sm:h-80 bg-gradient-to-br from-blue-400 to-indigo-500">
         {user.image ? (
           <img
             src={user.image}
@@ -76,9 +76,9 @@ export default function MatchingCard({ user, onAction, isLoading }: MatchingCard
       </div>
 
       {/* Profile Info */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1 break-words">
             {user.name}
           </h2>
           <div className="flex items-center text-gray-600 text-sm space-x-2">

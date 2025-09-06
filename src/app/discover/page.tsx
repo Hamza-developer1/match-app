@@ -253,9 +253,9 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      <div className="max-w-md mx-auto px-6 py-12">
+      <div className="max-w-md mx-auto px-4 sm:px-6 py-6 sm:py-12">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Find Study Buddies</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Find Study Buddies</h1>
           <p className="text-gray-600">Discover students who share your interests</p>
           
           {/* Connection Status - Only show if there are connection issues */}

@@ -36,7 +36,7 @@ export default function Home() {
       
       
       {/* Header with Comprehensive Navigation */}
-      <header className="w-full p-6 backdrop-blur-sm bg-white/80 border-b border-gray-100 sticky top-0 z-50">
+      <header className="w-full p-4 sm:p-6 backdrop-blur-sm bg-white/80 border-b border-gray-100 sticky top-0 z-50">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center space-x-2">
@@ -44,7 +44,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-lg">🎓</span>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Campus Connect
               </h1>
             </Link>
@@ -334,7 +334,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-20 sm:pb-32">
           <div className="text-center">
             {/* Floating academic icons animation */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -364,7 +364,7 @@ export default function Home() {
               </div>
             </div>
 
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
                 Find Your
               </span>
@@ -374,7 +374,7 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4">
               {status === "loading"
                 ? "Connect with fellow college students who share your hobbies, study interests, and passions. Build lasting friendships on campus."
                 : session
@@ -431,14 +431,14 @@ export default function Home() {
         </div>
 
         {/* Features Section */}
-        <div className="bg-white/60 backdrop-blur-sm py-20">
-          <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <div className="bg-white/60 backdrop-blur-sm py-12 sm:py-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-8 sm:mb-16 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Why Choose Campus Connect for Student Networking?
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              <div className="text-center p-6 sm:p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-white text-2xl">🎯</span>
                 </div>
@@ -451,7 +451,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-center p-6 sm:p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="w-16 h-16 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-white text-2xl">🏫</span>
                 </div>
@@ -464,7 +464,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-center p-6 sm:p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-white text-2xl">🤝</span>
                 </div>
@@ -482,8 +482,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-50/80 backdrop-blur-sm py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 text-center">
+      <footer className="bg-gray-50/80 backdrop-blur-sm py-8 sm:py-12 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm">🎓</span>
@@ -495,7 +495,7 @@ export default function Home() {
           <p className="text-gray-600 mb-6">
             Building academic connections through shared learning goals.
           </p>
-          <div className="flex justify-center space-x-8 text-sm text-gray-500">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-sm text-gray-500">
             <Link
               href="/privacy"
               className="hover:text-blue-600 transition-colors"

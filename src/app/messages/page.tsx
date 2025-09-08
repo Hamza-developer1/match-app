@@ -37,9 +37,5 @@ export default function MessagesPage() {
     return null;
   }
 
-  return (
-    <div className="h-screen">
-      <MessagingLayout />
-    </div>
-  );
+  return <MessagingLayout />;
 }

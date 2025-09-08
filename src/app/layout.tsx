@@ -25,10 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} antialiased`}
+        className={`${geistSans.variable} antialiased h-full`}
       >
         <AuthSessionProvider>
-          {children}
+          <div className="h-full">
+            {children}
+          </div>
         </AuthSessionProvider>
       </body>
     </html>

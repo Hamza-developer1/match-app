@@ -99,17 +99,12 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
   useEffect(() => {
     console.log('💬 ChatWindow - conversationMessages CHANGED:', conversationMessages.length);
     
-    // Auto-scroll only if:
-    // 1. It's the first load
-    // 2. User is near bottom and auto-scroll is enabled
-    if (isFirstLoad || shouldAutoScroll) {
+    // Only auto-scroll on first load, not on new messages
+    if (isFirstLoad) {
       scrollToBottom();
       setIsFirstLoad(false);
-    } else if (conversationMessages.length > 0) {
-      // Show new messages indicator if user is scrolled up and there are new messages
-      setHasNewMessages(true);
     }
-  }, [conversationMessages, isFirstLoad, shouldAutoScroll]);
+  }, [conversationMessages, isFirstLoad]);
 
   useEffect(() => {
     console.log('💬 ChatWindow - messages state CHANGED:', Object.keys(messages));
@@ -125,7 +120,6 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
     if (!newMessage.trim() || isSending) return;
 
     setIsSending(true);
-    setShouldAutoScroll(true); // Always auto-scroll when user sends a message
     const messageContent = newMessage.trim();
     setNewMessage('');
 
@@ -230,7 +224,6 @@ export default function ChatWindow({ conversation, onClose }: ChatWindowProps) {
 
   const sendEmoji = async (emoji: string) => {
     setIsSending(true);
-    setShouldAutoScroll(true); // Always auto-scroll when user sends an emoji
     try {
       await sendMessage(
         conversation.matchId,

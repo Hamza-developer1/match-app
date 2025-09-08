@@ -20,7 +20,7 @@ export default function MessagingLayout() {
   };
 
   return (
-    <div className="h-screen flex bg-gray-100">
+    <div className="h-dvh flex bg-gray-100">
       {/* Conversation List - Hidden on mobile when chat is open */}
       <div className={`w-full md:w-80 lg:w-96 ${showMobileChat ? 'hidden md:block' : 'block'}`}>
         <ConversationList
